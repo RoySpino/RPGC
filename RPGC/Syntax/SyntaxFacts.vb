@@ -1,4 +1,5 @@
-﻿Public Class SyntaxFacts
+﻿
+Public Class SyntaxFacts
     Public Shared badChars_Var() As Char = {".", "\", ",", "<", ">", "?", "", ":", """", "'", "[", "]", "{", "}", "+", "*", "-", "=", "(", ")", "^", "!", "`", "~"}
     Public Shared badChars_ToStartVar() As Char = {"_", "&", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
@@ -493,20 +494,20 @@
 
             ' set New range
             If (String.Compare(keyWords(mid), kw) < 0) Then
-                    min = mid
-                Else
-                    max = mid
-                End If
+                min = mid
+            Else
+                max = mid
+            End If
 
-                ' compute next symbol
-                diff = (max - min)
-                mid = diff >> 1
-                mid += min
+            ' compute next symbol
+            diff = (max - min)
+            mid = diff >> 1
+            mid += min
 
-                ' exit symbol Not found
-                If (diff <= 1) Then
-                    Return False
-                End If
+            ' exit symbol Not found
+            If (diff <= 1) Then
+                Return False
+            End If
         End While
 
         Return False

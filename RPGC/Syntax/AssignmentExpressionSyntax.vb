@@ -1,4 +1,6 @@
 ﻿Public Class AssignmentExpressionSyntax
+    Inherits ExpresionSyntax
+
     Public Property IDENTIFIERTOKEN As SyntaxToken
     Public Property ASSIGNMENTTOKEN As SyntaxToken
     Public Property EXPRESSION As ExpresionSyntax

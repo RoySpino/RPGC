@@ -87,10 +87,15 @@
   <ItemGroup>
     <Compile Include="Binding\Binder.vb" />
     <Compile Include="Binding\BoundAssignmentExpression.vb" />
+    <Compile Include="Binding\BoundBinExpression.vb" />
+    <Compile Include="Binding\BoundBinOperator.vb" />
     <Compile Include="Binding\BoundExpression.vb" />
     <Compile Include="Binding\BoundLiteralExp.vb" />
     <Compile Include="Binding\BoundNode.vb" />
+    <Compile Include="Binding\BoundUniExpression.vb" />
+    <Compile Include="Binding\BoundUniOperator.vb" />
     <Compile Include="Binding\BoundVariableExpression.vb" />
+    <Compile Include="Binding\UinaryExpressionSyntax.vb" />
     <Compile Include="Complation.vb" />
     <Compile Include="DiagnosticBag.vb" />
     <Compile Include="Diagnostics.vb" />
@@ -126,9 +131,9 @@
     <Compile Include="Syntax\SyntaxNode.vb" />
     <Compile Include="Syntax\SyntaxToken.vb" />
     <Compile Include="Syntax\SyntaxTree.vb" />
-    <Compile Include="Syntax\UinaryExpressionSyntax.vb" />
+    <Compile Include="Syntax\UniaryExpressionSyntax.vb" />
     <Compile Include="Text\SourceText.vb" />
-    <Compile Include="Text\TextLines.vb" />
+    <Compile Include="Text\TextLine.vb" />
     <Compile Include="Text\TextSpan.vb" />
     <Compile Include="VariableSymbol.vb" />
   </ItemGroup>

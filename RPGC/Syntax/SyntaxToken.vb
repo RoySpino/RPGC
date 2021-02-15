@@ -5,7 +5,7 @@ Public Class SyntaxToken
     Public tok As TokenKind
     Public line As Integer
     Public pos As Integer
-    Public sym As String
+    Public sym As Object
 
     Public Sub New(k As TokenKind, l As Integer, p As Integer, s As String)
         kind = k
@@ -13,6 +13,18 @@ Public Class SyntaxToken
         pos = p
         sym = s
     End Sub
+
+    Public Function span() As TextSpan
+        Dim tmp As String
+
+        If sym Is Nullable Then
+            tmp = ""
+        Else
+            tmp = sym.ToString()
+        End If
+
+        Return New TextSpan(pos, tmp.Length)
+    End Function
 
 End Class
 
@@ -105,6 +117,7 @@ Public Enum TokenKind
     TK_EVALR
     TK_EXCEPT
     TK_EXFMT
+    TK_EXPONENT
     TK_EXSR
     TK_EXTRCT
     TK_FEOD

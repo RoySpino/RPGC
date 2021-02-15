@@ -1,11 +1,11 @@
-﻿Public Class TextLines
+﻿Public Class TextLine
     Public Property Text As SourceText
     Public Property Start As Integer
     Public Property Length As Integer
     Public Property LengthWithLineBreak As Integer
     Public spanEnd As Integer
 
-    Public Sub New(txt As sourceText, strt As Integer, len As Integer, lwlb As Integer)
+    Public Sub New(txt As SourceText, strt As Integer, len As Integer, lwlb As Integer)
         Text = txt
         Start = strt
         Length = len

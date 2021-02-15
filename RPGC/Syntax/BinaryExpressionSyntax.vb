@@ -1,6 +1,7 @@
 ﻿Public Class BinaryExpressionSyntax
     Inherits ExpresionSyntax
 
+    Public Overrides Property kind As TokenKind = TokenKind.TK_BYNARYEXPR
     Public Property left As ExpresionSyntax
     Public Property operatorToken As SyntaxToken
     Public Property right As ExpresionSyntax

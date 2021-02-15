@@ -2,7 +2,8 @@
 Imports System.Reflection
 
 Public Class SyntaxNode
-    Public Property kind As TokenKind
+    Public Overridable Property kind As TokenKind
+    Public Property sym As Object
 
     Public Sub New()
         kind = 0

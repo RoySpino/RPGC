@@ -1,4 +1,4 @@
-﻿Public Class UinaryExpressionSyntax
+﻿Public Class UniaryExpressionSyntax
     Inherits ExpresionSyntax
 
     Public Property Operand As SyntaxToken
