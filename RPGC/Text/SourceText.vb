@@ -115,7 +115,7 @@ Public Class SourceText
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////////
-    Public Function getLineIndes(pos As Integer) As Integer
+    Public Function getLineIndex(pos As Integer) As Integer
         Dim max, Mid, min, diff As Integer
 
         max = Lines.Length
@@ -147,5 +147,19 @@ Public Class SourceText
         End While
 
         Return 0
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////
+    Public Function Length() As Integer
+        Return _Text.Length
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////
+    Public Function charAt(index As Integer) As String
+        If index < 0 Or index >= _Text.Length Then
+            Return Asc(0)
+        End If
+
+        Return _Text(index)
     End Function
 End Class

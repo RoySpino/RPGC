@@ -94,8 +94,8 @@ Public Class Binder
 
         ' account for errors
         If boundOperatorKind Is Nothing Then
-            diagnostics.reportUndefinedUniaryOp(syntax.Operand.span, syntax.Operand.sym.ToString(), expression.type);
-                Return expression
+            diagnostics.reportUndefinedUniaryOp(syntax.operand.span, syntax.operand.sym.ToString(), expression.typ)
+            Return expression
         End If
 
         Return New BoundUniExpression(boundOperatorKind, expression)

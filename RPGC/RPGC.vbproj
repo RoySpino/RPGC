@@ -119,6 +119,7 @@
     </Compile>
     <Compile Include="Syntax\AssignmentExpressionSyntax.vb" />
     <Compile Include="Syntax\BinaryExpressionSyntax.vb" />
+    <Compile Include="Syntax\CompilationUnit.vb" />
     <Compile Include="Syntax\Decimator.vb" />
     <Compile Include="Syntax\ExpresionSyntax.vb" />
     <Compile Include="Syntax\Lexer.vb" />

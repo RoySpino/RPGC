@@ -6,7 +6,7 @@ Public Class Parser
     Private current As SyntaxToken
     Private pos As Integer
     Private tcount As Integer
-    Private diagnostics As DiagnosticBag
+    Private diagnostics As DiagnosticBag = New DiagnosticBag()
     Public ReadOnly tokens As ImmutableArray(Of SyntaxToken)
     Public ReadOnly source As SourceText
 
@@ -33,7 +33,7 @@ Public Class Parser
             End If
 
             ' save avalable tokens
-            If tok = TokenKind.TK_EOI Then
+            If tok.kind = TokenKind.TK_EOI Then
                 Exit While
             End If
         End While
@@ -207,7 +207,20 @@ Public Class Parser
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////
-    Public Function parse() As SyntaxTree
+    'Public Function parse() As SyntaxTree
+    '
+    '    Dim ret As ExpresionSyntax
+    '    Dim tmp As SyntaxToken
+    '
+    '    ret = parceExpression()
+    '
+    '    tmp = match(TokenKind.TK_EOI)
+    '
+    '    Return New SyntaxTree(source, diagnostics, ret, tmp)
+    'End Function
+
+    ' ///////////////////////////////////////////////////////////////////////
+    Public Function parseCompilationUnit() As CompilationUnit
 
         Dim ret As ExpresionSyntax
         Dim tmp As SyntaxToken
@@ -216,8 +229,9 @@ Public Class Parser
 
         tmp = match(TokenKind.TK_EOI)
 
-        Return New SyntaxTree(source, diagnostics, ret, tmp)
+        Return New CompilationUnit(ret, tmp)
     End Function
+
 
     ' ///////////////////////////////////////////////////////////////////////
     Public Function getDiagnostics() As DiagnosticBag

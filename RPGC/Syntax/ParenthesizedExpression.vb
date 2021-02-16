@@ -1,7 +1,7 @@
 ﻿Public Class ParenthesizedExpression
     Inherits ExpresionSyntax
 
-    Public Property Overrides kind As TokenKind = TokenKind.TK_PARENEXP
+    Public Overrides Property Kind As TokenKind = TokenKind.TK_PARENEXP
     Public Property OPENParen As SyntaxToken
     Public Property expression As ExpresionSyntax
     Public Property CLOSEParen As SyntaxToken

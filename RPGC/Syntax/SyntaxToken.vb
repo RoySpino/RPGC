@@ -17,7 +17,7 @@ Public Class SyntaxToken
     Public Function span() As TextSpan
         Dim tmp As String
 
-        If sym Is Nullable Then
+        If sym Is Nothing Then
             tmp = ""
         Else
             tmp = sym.ToString()

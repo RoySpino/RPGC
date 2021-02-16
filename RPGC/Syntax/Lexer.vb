@@ -1,5 +1,5 @@
 ﻿Public Class Lexer
-    Private source As String
+    Private source As SourceText
     Private tmpVal As String
     Private pos As Integer
     Private linePos As Integer
@@ -10,7 +10,7 @@
     Private curSpec As String
     Private diagnostics As DiagnosticBag
     Private onEvalLine As Boolean
-    Private doFreeLex As Boolean
+    Private doFreeLex As Boolean = True
     Private lineElem As List(Of StructNode)
     Private strucLexLine As List(Of SyntaxToken) = New List(Of SyntaxToken)()
 
@@ -18,13 +18,13 @@
     Private kind As TokenKind
     Private value As Object
 
-    Public Sub New(sour As String)
+    Public Sub New(sour As SourceText)
         source = sour
         pos = -1
         linePos = 0
         curSpec = "H"
         lineNum = 1
-        sSize = sour.Length
+        sSize = sour.Length()
 
         nextChar()
     End Sub
@@ -36,13 +36,13 @@
         If pos >= sSize Then
             curChar = Chr(0)
         Else
-            curChar = source(pos)
+            curChar = source.charAt(pos)
 
             If curChar = vbNewLine Then
                 pos += 1
                 lineNum += 1
                 linePos = 0
-                curChar = source(pos)
+                curChar = source.charAt(pos)
             End If
 
             linePos += 1
@@ -58,7 +58,7 @@
         If index >= sSize Then
             Return Chr(0)
         Else
-            Return source(index)
+            Return source.charAt(pos)
         End If
     End Function
 
@@ -224,25 +224,25 @@
                 nextChar()
             Case Chr(37)
                 symbol = readBuiltInFunctions()
-            Case Chr(64)
-            Case Chr(35)
-            Case Chr(36)
+            Case Chr(64),
+                 Chr(35),
+                 Chr(36)
                 symbol = readIdentifierOrKeyword()
-            Case Chr(48)
-            Case Chr(49)
-            Case Chr(50)
-            Case Chr(51)
-            Case Chr(52)
-            Case Chr(53)
-            Case Chr(54)
-            Case Chr(55)
-            Case Chr(56)
-            Case Chr(57)
+            Case Chr(48),
+                 Chr(49),
+                 Chr(50),
+                 Chr(51),
+                 Chr(52),
+                 Chr(53),
+                 Chr(54),
+                 Chr(55),
+                 Chr(56),
+                 Chr(57)
                 symbol = readNumberToken()
-            Case Chr(32)
-            Case Chr(10)
-            Case Chr(9)
-            Case Chr(13)
+            Case Chr(32),
+                Chr(10),
+                 Chr(9),
+                 Chr(13)
                 readWiteSpace()
             Case Else
                 If Char.IsLetter(curChar) = True Then
