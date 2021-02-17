@@ -2,29 +2,30 @@
 Public Class SyntaxToken
     Inherits SyntaxNode
 
-    Public tok As TokenKind
+    Public Property tok As TokenKind
+    Public Property pos As Integer
     Public line As Integer
-    Public pos As Integer
-    Public sym As Object
 
-    Public Sub New(k As TokenKind, l As Integer, p As Integer, s As String)
+    Public Sub New(k As TokenKind, l As Integer, p As Integer, s As Object)
         kind = k
         line = l
         pos = p
         sym = s
     End Sub
 
-    Public Function span() As TextSpan
-        Dim tmp As String
+    Public Overloads ReadOnly Property Span As TextSpan
+        Get
+            Dim tmp As String
 
-        If sym Is Nothing Then
-            tmp = ""
-        Else
-            tmp = sym.ToString()
-        End If
+            If sym Is Nothing Then
+                tmp = ""
+            Else
+                tmp = sym.ToString()
+            End If
 
-        Return New TextSpan(pos, tmp.Length)
-    End Function
+            Return New TextSpan(pos, tmp.Length)
+        End Get
+    End Property
 
 End Class
 

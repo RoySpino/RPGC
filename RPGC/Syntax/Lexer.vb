@@ -50,7 +50,7 @@
     End Function
 
     ' ////////////////////////////////////////////////////////////////////////////////////
-    Private Function peek(offset As Integer) As Char
+    Private Function peek(offset As Integer) As String
         Dim index As Integer
 
         index = pos + offset
@@ -58,7 +58,7 @@
         If index >= sSize Then
             Return Chr(0)
         Else
-            Return source.charAt(pos)
+            Return source.charAt(index)
         End If
     End Function
 
@@ -163,6 +163,7 @@
         End If
 
         ' c++ style comment line
+        value = peek(1)
         If curChar = "/" And peek(1) = "/" Then
             ignoreCommentLine()
         End If
@@ -173,74 +174,74 @@
                 symbol = "_"
                 kind = TokenKind.TK_EOI
                 value = "_"
-            Case Chr(59)
+            Case ";"
                 start += 1
                 symbol = ";"
                 kind = TokenKind.TK_SEMI
                 onEvalLine = True
                 nextChar()
-            Case Chr(43)
+            Case "+"
                 start += 1
                 kind = TokenKind.TK_ADD
                 value = "+"
                 nextChar()
-            Case Chr(45)
+            Case "-"
                 start += 1
                 kind = TokenKind.TK_SUB
                 value = "-"
                 nextChar()
-            Case Chr(42)
+            Case "*"
                 start += 1
                 symbol = readCompilerConstantsOrMult()
-            Case Chr(47)
+            Case "/"
                 start += 1
                 kind = TokenKind.TK_DIV
                 value = "/"
                 nextChar()
-            Case Chr(40)
+            Case "("
                 start += 1
                 kind = TokenKind.TK_PARENOPEN
                 value = "("
                 nextChar()
-            Case Chr(41)
+            Case ")"
                 start += 1
                 kind = TokenKind.TK_PARENCLOSE
                 value = ")"
                 nextChar()
-            Case Chr(61)
+            Case "="
                 start += 1
                 kind = getAssignmentOrComparisonToken()
                 value = "="
                 nextChar()
-            Case Chr(60)
+            Case "<"
                 start += 1
                 kind = getLessGreaterThanOperator("<", peek(1))
                 value = tmpVal
                 nextChar()
-            Case Chr(62)
+            Case ">"
                 start += 1
                 kind = getLessGreaterThanOperator(">", peek(1))
                 value = tmpVal
                 nextChar()
-            Case Chr(37)
+            Case "%"
                 symbol = readBuiltInFunctions()
-            Case Chr(64),
-                 Chr(35),
-                 Chr(36)
+            Case "@",
+                 "#",
+                 "$"
                 symbol = readIdentifierOrKeyword()
-            Case Chr(48),
-                 Chr(49),
-                 Chr(50),
-                 Chr(51),
-                 Chr(52),
-                 Chr(53),
-                 Chr(54),
-                 Chr(55),
-                 Chr(56),
-                 Chr(57)
+            Case "0",
+                 "1",
+                 "2",
+                 "3",
+                 "4",
+                 "5",
+                 "6",
+                 "7",
+                 "8",
+                 "9"
                 symbol = readNumberToken()
             Case Chr(32),
-                Chr(10),
+                 Chr(10),
                  Chr(9),
                  Chr(13)
                 readWiteSpace()
@@ -368,7 +369,7 @@
 
         ' /check if the symbol Is an indicator
         kind = SyntaxFacts.getBuiltInIndicator(peekStr)
-        If (kind! = TokenKind.TK_BADTOKEN) Then
+        If (kind <> TokenKind.TK_BADTOKEN) Then
             nextChar()
             While Char.IsLetterOrDigit(curChar) = True
                 nextChar()
@@ -380,7 +381,7 @@
 
         ' /check compiler constants
         kind = SyntaxFacts.getCompilerConstans(peekStr)
-        If (kind! = TokenKind.TK_BADTOKEN) Then
+        If (kind <> TokenKind.TK_BADTOKEN) Then
             nextChar()
             While Char.IsLetterOrDigit(curChar) = True
                 nextChar()

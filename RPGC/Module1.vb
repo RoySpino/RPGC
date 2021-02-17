@@ -101,7 +101,14 @@ Module Module1
                     Console.ResetColor()
                     Console.WriteLine(sufix)
                 Next
+            Else
+                ' show compiled result
+                Console.ForegroundColor = ConsoleColor.DarkMagenta
+                Console.WriteLine(bexpr.value)
+                Console.ResetColor()
             End If
+
+            sbuilder.Clear()
         End While
     End Sub
 

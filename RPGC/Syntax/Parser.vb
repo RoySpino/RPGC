@@ -55,7 +55,7 @@ Public Class Parser
             Return Nothing
         Else
             ret = tokens(pos)
-            pos += IIf((pos >= tcount), -1, 1)
+            pos += IIf(((pos + 1) >= tcount), -1, 1)
             current = tokens(pos)
             Return ret
         End If
@@ -100,7 +100,7 @@ Public Class Parser
             operand = parsePrimaryExpresion()
             left = New UniaryExpressionSyntax(operatorToken, operand)
         Else
-            left = parseBinaryExpresion()
+            left = parsePrimaryExpresion()
         End If
 
         ' regulare numerical expressions
