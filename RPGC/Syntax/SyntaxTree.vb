@@ -1,6 +1,6 @@
 ﻿Public Class SyntaxTree
     Private diagnostic As DiagnosticBag = New DiagnosticBag()
-    Public ROOT As ExpresionSyntax
+    Public ROOT As CompilationUnit
     Public EOFT As SyntaxToken
     Public text As SourceText
 
@@ -14,8 +14,8 @@
         diagnos = par.getDiagnostics()
 
         text = source
-        ROOT = rot.Expression
-        EOFT = rot.EndOfFileToken
+        ROOT = ROOT
+        EOFT = ROOT.EndOfFileToken
         diagnostic = diagnos
     End Sub
 
@@ -26,13 +26,9 @@
 
     ' ///////////////////////////////////////////////////////////////////////
     Public Shared Function Parce(txt As String) As SyntaxTree
-        Dim sourceText As SourceText
-        Dim ret As SyntaxTree = Nothing
+        Dim SourceText As SourceText = SourceText.from(txt)
 
-        sourceText = SourceText.from(txt)
-        ret = New SyntaxTree(sourceText)
-
-        Return ret
+        Return New SyntaxTree(SourceText)
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////

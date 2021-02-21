@@ -23,6 +23,7 @@ Module Module1
         Dim spanError As TextSpan
         Dim sbuilder As StringBuilder = New StringBuilder()
         Dim Text As SourceText
+        Dim prev As Complation = Nothing
 
         While True
             If sbuilder.length = 0 Then
@@ -35,10 +36,18 @@ Module Module1
             ln = Console.ReadLine()
             isBlank = String.IsNullOrEmpty(ln)
 
+            ' perform non-compiler commands
             If (sbuilder.Length = 0) Then
-                If (ln = "exit") Then
-                    Exit While
-                End If
+                Select Case ln
+                    Case "!exit"
+                        Exit While
+                    Case "!tree"
+                        doShowTree = True
+                        Continue While
+                    Case "!clear"
+                        Console.Clear()
+                        Continue While
+                End Select
             End If
 
             sbuilder.AppendLine(ln)
@@ -49,9 +58,8 @@ Module Module1
                 Continue While
             End If
 
-            complatin = New Complation(stree)
+            complatin = IIf(prev Is Nothing, New Complation(stree), prev.continueWith(stree))
             bexpr = complatin.evaluate(variables)
-            RPGDiagnostics.AddRange(bexpr._Diagnostics)
 
             If doShowTree = True Then
                 Console.BackgroundColor = ConsoleColor.Green
@@ -64,10 +72,10 @@ Module Module1
                 Console.ResetColor()
             End If
 
-            If RPGDiagnostics.Count() > 0 Then
+            If bexpr._Diagnostics.Count() > 0 Then
                 Text = stree.text
 
-                For Each x As Diagnostics In RPGDiagnostics
+                For Each x As Diagnostics In bexpr._Diagnostics
                     lineIndex = Text.getLineIndex(x.SPAN.START)
                     lineNumber = lineIndex + 1
                     line = Text.Lines(lineIndex)
@@ -106,6 +114,8 @@ Module Module1
                 Console.ForegroundColor = ConsoleColor.DarkMagenta
                 Console.WriteLine(bexpr.value)
                 Console.ResetColor()
+
+                prev = complatin
             End If
 
             sbuilder.Clear()

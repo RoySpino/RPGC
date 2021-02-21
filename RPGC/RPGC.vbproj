@@ -90,8 +90,10 @@
     <Compile Include="Binding\BoundBinExpression.vb" />
     <Compile Include="Binding\BoundBinOperator.vb" />
     <Compile Include="Binding\BoundExpression.vb" />
+    <Compile Include="Binding\BoundGlobalScope.vb" />
     <Compile Include="Binding\BoundLiteralExp.vb" />
     <Compile Include="Binding\BoundNode.vb" />
+    <Compile Include="Binding\BoundScope.vb" />
     <Compile Include="Binding\BoundUniExpression.vb" />
     <Compile Include="Binding\BoundUniOperator.vb" />
     <Compile Include="Binding\BoundVariableExpression.vb" />

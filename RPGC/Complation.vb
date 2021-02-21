@@ -1,29 +1,56 @@
-﻿Public Class Complation
-    Public syntax As SyntaxTree
+﻿Imports System.Collections.Immutable
+Imports System.Threading
+
+Public Class Complation
+    Public Property syntax As SyntaxTree
     Private diognost As DiagnosticBag = New DiagnosticBag()
+    Private _globalScope As BoundGlobalScope
+    Private previous As Complation
 
     Public Sub New(tree As SyntaxTree)
         syntax = tree
-
-        'diognost.AddRange(tree.getDiagnostics())
+        previous = Nothing
     End Sub
 
-    Public Function evaluate(_variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
-        Dim bindr As Binder = New Binder(_variables)
-        Dim boundExpr As BoundExpression = bindr.BindExpression(syntax.ROOT)
-        Dim eval As Evaluator
+    ' ////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Sub New(prev As Complation, tree As SyntaxTree)
+        syntax = tree
+        previous = prev
+    End Sub
 
-        diognost.AddRange(syntax.getDiagnostics())
-        diognost.AddRange(bindr.diagnostics)
+    ' ////////////////////////////////////////////////////////////////////////////////////////////////////
+    Friend ReadOnly Property GlobalScope_ As BoundGlobalScope
+        Get
+            Dim gs As BoundGlobalScope
+            If _globalScope Is Nothing Then
+                gs = Binder.bindGlobalScope(previous?.GlobalScope_, syntax.ROOT)
+                Interlocked.CompareExchange(_globalScope, gs, Nothing)
+            End If
+
+            Return _globalScope
+        End Get
+    End Property
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Function continueWith(tree_ As SyntaxTree) As Complation
+        Return New Complation(Me, tree_)
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Function evaluate(_variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
+        Dim diognos As ImmutableArray(Of Diagnostics)
+        Dim eval As Evaluator
+        Dim value As Object
+
+        diognos = syntax.getDiagnostics().Concat(globalScope_.Diagnostic).ToImmutableArray()
 
         If diognost.Any() Then
-            Return New EvaluationResult(diognost, Nothing)
+            Return New EvaluationResult(diognos, Nothing)
         End If
 
-        eval = New Evaluator(boundExpr, _variables)
+        eval = New Evaluator(_globalScope.Expression, _variables)
+        value = eval.Evaluate()
 
-        Dim value = eval.Evaluate()
-
-        Return New EvaluationResult(Nothing, value)
+        Return New EvaluationResult(ImmutableArray(Of Diagnostics).Empty, value)
     End Function
 End Class

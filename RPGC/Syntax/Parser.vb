@@ -7,6 +7,7 @@ Public Class Parser
     Private pos As Integer
     Private tcount As Integer
     Private diagnostics As DiagnosticBag = New DiagnosticBag()
+    Private dummy As SyntaxToken = New SyntaxToken(TokenKind.TK_EOI, 0, pos, "")
     Public ReadOnly tokens As ImmutableArray(Of SyntaxToken)
     Public ReadOnly source As SourceText
 
@@ -52,11 +53,11 @@ Public Class Parser
         Dim ret As SyntaxToken
 
         If pos >= tcount Then
-            Return Nothing
+            Return tokens(tcount - 1)
         Else
             ret = tokens(pos)
-            pos += IIf(((pos + 1) >= tcount), -1, 1)
-            current = tokens(pos)
+            pos += 1
+            current = IIf(pos >= tcount, dummy, tokens(pos))
             Return ret
         End If
 
@@ -103,7 +104,7 @@ Public Class Parser
             left = parsePrimaryExpresion()
         End If
 
-        ' regulare numerical expressions
+        ' regular numerical expressions
         While True
             precedence = SyntaxFacts.getBinaryOporatorPrecedence(current.kind)
             If precedence = 0 Or precedence <= parentPrecedence Then
@@ -130,10 +131,6 @@ Public Class Parser
         Dim right As ExpresionSyntax
         Dim identifierToken, operatorToken As SyntaxToken
 
-        If peek(0).kind = TokenKind.TK_BADTOKEN Then
-            Return Nothing
-        End If
-
         If peek(0).kind = TokenKind.TK_IDENTIFIER And peek(1).kind = TokenKind.TK_ASSIGN Then
             identifierToken = nextToken()
             operatorToken = nextToken()
@@ -154,7 +151,7 @@ Public Class Parser
                 Return parseTokenBoolenLiteral()
             Case TokenKind.TK_INTEGER,
                  TokenKind.TK_ZONED,
-                  TokenKind.TK_PACKED
+                 TokenKind.TK_PACKED
                 Return parseNumberLiteral()
             Case TokenKind.TK_IDENTIFIER
                 Return parseTokenNamedExpression()
@@ -168,6 +165,7 @@ Public Class Parser
         Dim identifier As SyntaxToken
 
         identifier = match(TokenKind.TK_IDENTIFIER)
+
         Return New NamedExpressionSyntax(identifier)
     End Function
 
@@ -205,19 +203,6 @@ Public Class Parser
 
         Return New LiteralExpressionSyntax(numberToken)
     End Function
-
-    ' ///////////////////////////////////////////////////////////////////////
-    'Public Function parse() As SyntaxTree
-    '
-    '    Dim ret As ExpresionSyntax
-    '    Dim tmp As SyntaxToken
-    '
-    '    ret = parceExpression()
-    '
-    '    tmp = match(TokenKind.TK_EOI)
-    '
-    '    Return New SyntaxTree(source, diagnostics, ret, tmp)
-    'End Function
 
     ' ///////////////////////////////////////////////////////////////////////
     Public Function parseCompilationUnit() As CompilationUnit

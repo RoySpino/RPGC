@@ -71,6 +71,22 @@ Public Class DiagnosticBag
         report(span, message)
     End Sub
 
+    Friend Sub reportCannotConvertType(span As TextSpan, name As String, typeA As Type, typeB As Type)
+        Dim message As String
+
+        message = String.Format("rpgc: can not convert variable [{0}] from {1} to {2}", name, typeA, typeB)
+
+        report(span, message)
+    End Sub
+
+    Friend Sub reportVariableAlreadyDeclared(span As TextSpan, name As String)
+        Dim message As String
+
+        message = String.Format("rpgc:({1},{2}): redeclaration of ‘{0}’", name, 0, 0)
+
+        report(span, message)
+    End Sub
+
     ' //////////////////////////////////////////////////////////////////////////
     Public Sub reportMissingFactor1(span As TextSpan, lp As Integer)
         Dim message As String
