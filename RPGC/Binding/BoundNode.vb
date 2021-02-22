@@ -1,3 +1,3 @@
 ﻿Public Class BoundNode
-    Public tok As BoundNodeToken
+    Public Overridable Property tok As BoundNodeToken
 End Class

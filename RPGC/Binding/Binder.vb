@@ -29,16 +29,52 @@ Public Class Binder
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////////////
+    Private Function BindStatements(syntax As StatementSyntax) As BoundStatement
+        Select Case syntax.kind
+            Case TokenKind.TK_BLOCKSYNTX
+                Return BindBlockStatement(syntax)
+            Case TokenKind.TK_EXPRNSTMNT
+                Return BindExpressionStatement(syntax)
+            Case Else
+                Throw New Exception(String.Format("Unexpected Syntax {0}", syntax.kind))
+        End Select
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////////
+    Private Function BindBlockStatement(syntax As BlockStatementSyntax) As BoundStatement
+        Dim statements As ImmutableArray(Of BoundStatement).Builder
+        Dim statement As BoundStatement
+
+        statements = ImmutableArray.CreateBuilder(Of BoundStatement)()
+
+        For Each syntaxStatement As StatementSyntax In syntax.Statements
+            statement = BindStatements(syntaxStatement)
+            statements.Add(statement)
+        Next
+
+        Return New BoundBlockStatement(statements.ToImmutable())
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////////
+    Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement
+        Dim expression As BoundExpression
+
+        expression = BindExpression(syntax.Expression)
+
+        Return New BoundExpressionStatement(expression)
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////////
     Public Shared Function bindGlobalScope(prev As BoundGlobalScope, syntax As CompilationUnit)
         Dim parantScop As BoundScope
         Dim bind As Binder
-        Dim expression As BoundExpression
+        Dim stmt As BoundStatement
         Dim vars As ImmutableArray(Of VariableSymbol)
         Dim diag As ImmutableArray(Of Diagnostics)
 
         parantScop = createParantScope(prev)
         bind = New Binder(parantScop)
-        expression = bind.BindExpression(syntax.Expression)
+        stmt = bind.BindStatements(syntax.Statement)
         vars = bind.scope.getDeclaredVariables()
         diag = bind.diagnostics.ToImmutableArray()
 
@@ -46,7 +82,7 @@ Public Class Binder
             diag = diag.InsertRange(0, prev.Diagnostic)
         End If
 
-        Return New BoundGlobalScope(prev, diag, vars, expression)
+        Return New BoundGlobalScope(prev, diag, vars, stmt)
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////////////
@@ -175,6 +211,8 @@ Public Enum BoundNodeToken
     BNT_VAREX
     BNT_ASNEX
     BNT_BINEX
+    BNT_EXPRSTMT
+    BNT_BLOCKSTMT
 End Enum
 Public Enum BoundUniOpToken
     BUO_IDENTITY

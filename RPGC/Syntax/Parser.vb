@@ -57,7 +57,7 @@ Public Class Parser
         Else
             ret = tokens(pos)
             pos += 1
-            current = IIf(pos >= tcount, dummy, tokens(pos))
+            current = tokens(IIf(pos >= tcount, tcount - 1, pos))
             Return ret
         End If
 
@@ -204,13 +204,86 @@ Public Class Parser
         Return New LiteralExpressionSyntax(numberToken)
     End Function
 
+    Private Function parseStaement() As StatementSyntax
+        Select Case current.kind
+            Case TokenKind.TK_BLOCKSTART
+                Return parseBlockStaement()
+            Case TokenKind.TK_VARDCONST,
+                 TokenKind.TK_VARDECLR
+                Return parseVariableDeclaration()
+            Case Else
+                Return parseExpressionStaement()
+        End Select
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////
+    Private Function parseExpressionStaement() As StatementSyntax
+        Dim expression As ExpresionSyntax
+        expression = parceExpression()
+        Return New ExpressionStatementSyntax(expression)
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////
+    Private Function parseVariableDeclaration() As StatementSyntax
+        Dim expected, typeToken As TokenKind
+        Dim keyworkd, identifier, initKeyWord As SyntaxToken
+        Dim initilize As ExpresionSyntax
+        Dim typ As Type
+
+        Select Case current.kind
+            Case TokenKind.TK_VARDDATAS,
+                 TokenKind.TK_VARDCONST
+                expected = current.kind
+            Case Else
+                expected = TokenKind.TK_VARDECLR
+        End Select
+
+
+        keyworkd = match(expected)
+        identifier = match(TokenKind.TK_IDENTIFIER)
+        typeToken = current.kind
+        nextToken()
+        initKeyWord = match(TokenKind.TK_INZ)
+        initilize = parceExpression()
+
+        ' get variable Type
+        Select Case typeToken
+            Case TokenKind.TK_INTEGER
+                typ = GetType(Int32)
+            Case Else
+                typ = GetType(Int32)
+        End Select
+
+        Return New VariableDeclarationSyntax(keyworkd, identifier, typ, initKeyWord, initilize)
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////
+    Private Function parseBlockStaement() As StatementSyntax
+        Dim statements As ImmutableArray(Of StatementSyntax).Builder
+        Dim openStatementToken As SyntaxToken
+        Dim closeStatementToken As SyntaxToken
+        Dim statmt As StatementSyntax
+
+        statements = ImmutableArray.CreateBuilder(Of StatementSyntax)()
+        openStatementToken = match(TokenKind.TK_BLOCKSTART)
+        closeStatementToken = match(TokenKind.TK_BLOCKEND)
+
+        While (current.kind <> TokenKind.TK_EOI And current.kind <> TokenKind.TK_BLOCKEND)
+            statmt = parseStaement()
+            statements.Add(statmt)
+        End While
+
+        Return New BlockStatementSyntax(openStatementToken, statements.ToImmutable(), closeStatementToken)
+    End Function
+
+
     ' ///////////////////////////////////////////////////////////////////////
     Public Function parseCompilationUnit() As CompilationUnit
 
-        Dim ret As ExpresionSyntax
+        Dim ret As StatementSyntax
         Dim tmp As SyntaxToken
 
-        ret = parceExpression()
+        ret = parseStaement()
 
         tmp = match(TokenKind.TK_EOI)
 

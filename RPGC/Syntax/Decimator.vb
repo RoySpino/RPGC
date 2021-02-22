@@ -9,6 +9,7 @@
     Private Shared diagnostics As DiagnosticBag = New DiagnosticBag()
     Private Shared assignmentCnt As Integer
     Private Shared onEvalLine As Boolean
+    Private Shared parenCnt As Integer = 0
 
     Private Shared Function isGoodSpec(spec As String) As Boolean
 
@@ -347,9 +348,11 @@
                 Case 40
                     kind = TokenKind.TK_PARENOPEN
                     Value = "("
+                    parenCnt += 1
                 Case 41
                     kind = TokenKind.TK_PARENCLOSE
                     Value = ")"
+                    parenCnt -= 1
                 Case 61
                     kind = getAssignmentOrComparisonToken(line, i)
                     Value = "="
@@ -575,6 +578,8 @@
     ' ////////////////////////////////////////////////////////////////////////////////////
     Private Shared Function getAssignmentOrComparisonToken(line As String, ByRef pos As Integer) As String
         Dim ret As TokenKind
+
+        onEvalLine = (parenCnt = 0)
 
         ' check if the current line is a comparison or assignment
         If onEvalLine = True And assignmentCnt < 1 Then

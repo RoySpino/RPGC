@@ -9,7 +9,6 @@
     Public Sub New(A As ExpresionSyntax, operation As SyntaxToken, B As ExpresionSyntax)
         left = A
         right = B
-        kind = TokenKind.TK_BYNARYEXPR
 
         operatorToken = operation
     End Sub

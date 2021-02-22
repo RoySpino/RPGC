@@ -1,13 +1,14 @@
 ﻿Public Class Evaluator
-    Private ReadOnly ROOT As BoundExpression
+    Private ReadOnly ROOT As BoundStatement
     Private variables As Dictionary(Of VariableSymbol, Object)
+    Private lastValue As Object
 
-    Public Sub New(rot As BoundExpression)
+    Public Sub New(rot As BoundStatement)
         ROOT = rot
     End Sub
 
     ' //////////////////////////////////////////////////////////////
-    Public Sub New(rot As BoundExpression, var As Dictionary(Of VariableSymbol, Object))
+    Public Sub New(rot As BoundStatement, var As Dictionary(Of VariableSymbol, Object))
         ROOT = rot
         variables = var
     End Sub
@@ -81,6 +82,30 @@
             End If
         End If
     End Function
+
+    ' //////////////////////////////////////////////////////////////
+    Private Function EvaluatStatement(node As BoundStatement) As Object
+        Select Case node.tok
+            Case BoundNodeToken.BNT_BLOCKSTMT
+                evaluateBlockStatemnt(node)
+            Case BoundNodeToken.BNT_EXPRSTMT
+                evaluateExpressionStatement(node)
+            Case Else
+                Throw New Exception(String.Format("unexpected token {0}", ROOT.tok))
+        End Select
+    End Function
+
+    ' //////////////////////////////////////////////////////////////
+    Private Sub evaluateBlockStatemnt(node As BoundBlockStatement)
+        For Each statement As BoundStatement In node.Statements
+            EvaluatStatement(statement)
+        Next
+    End Sub
+
+    ' //////////////////////////////////////////////////////////////
+    Private Sub evaluateExpressionStatement(stmnt As BoundExpressionStatement)
+        lastValue = EvaluatExpression(stmnt.Expression)
+    End Sub
 
     ' //////////////////////////////////////////////////////////////
     Private Function EvaluatExpression(root As BoundExpression) As Object
@@ -187,6 +212,7 @@
 
     ' //////////////////////////////////////////////////////////////
     Public Function Evaluate() As Object
-        Return EvaluatExpression(ROOT)
+        EvaluatStatement(ROOT)
+        Return lastValue
     End Function
 End Class

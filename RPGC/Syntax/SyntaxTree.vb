@@ -1,5 +1,5 @@
 ﻿Public Class SyntaxTree
-    Private diagnostic As DiagnosticBag = New DiagnosticBag()
+    Private diagnostic As DiagnosticBag
     Public ROOT As CompilationUnit
     Public EOFT As SyntaxToken
     Public text As SourceText
@@ -14,7 +14,7 @@
         diagnos = par.getDiagnostics()
 
         text = source
-        ROOT = ROOT
+        ROOT = rot
         EOFT = ROOT.EndOfFileToken
         diagnostic = diagnos
     End Sub

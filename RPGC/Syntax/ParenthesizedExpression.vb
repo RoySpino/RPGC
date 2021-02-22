@@ -10,7 +10,6 @@
         OPENParen = open_Paren
         CLOSEParen = close_Paren
         expression = expr
-        kind = TokenKind.TK_PARENEXP
     End Sub
 
 End Class

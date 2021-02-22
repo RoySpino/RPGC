@@ -493,7 +493,7 @@ Public Class SyntaxFacts
             End If
 
             ' set New range
-            If (String.Compare(keyWords(mid), kw) < 0) Then
+            If String.Compare(keyWords(mid), kw) < 0 Then
                 min = mid
             Else
                 max = mid
@@ -505,7 +505,7 @@ Public Class SyntaxFacts
             mid += min
 
             ' exit symbol Not found
-            If (diff <= 1) Then
+            If diff = 0 Then
                 Return False
             End If
         End While
@@ -541,7 +541,7 @@ Public Class SyntaxFacts
             End If
 
             ' set New range
-            If (String.Compare(keyWords(mid), kw) < 0) Then
+            If String.Compare(keyWords(mid), kw) < 0 Then
                 min = mid
             Else
                 max = mid
@@ -553,7 +553,7 @@ Public Class SyntaxFacts
             mid += min
 
             ' exit symbol Not found
-            If (diff <= 1) Then
+            If diff = 0 Then
                 Return False
             End If
         End While

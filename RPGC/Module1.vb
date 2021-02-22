@@ -58,7 +58,11 @@ Module Module1
                 Continue While
             End If
 
-            complatin = IIf(prev Is Nothing, New Complation(stree), prev.continueWith(stree))
+            If prev Is Nothing Then
+                complatin = New Complation(stree)
+            Else
+                complatin = prev.continueWith(stree)
+            End If
             bexpr = complatin.evaluate(variables)
 
             If doShowTree = True Then

@@ -48,7 +48,7 @@ Public Class Complation
             Return New EvaluationResult(diognos, Nothing)
         End If
 
-        eval = New Evaluator(_globalScope.Expression, _variables)
+        eval = New Evaluator(_globalScope.Statement, _variables)
         value = eval.Evaluate()
 
         Return New EvaluationResult(ImmutableArray(Of Diagnostics).Empty, value)

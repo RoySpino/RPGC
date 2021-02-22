@@ -1,6 +1,7 @@
 ﻿Public Class BoundBinExpression
     Inherits BoundExpression
 
+    Public Overrides Property tok As BoundNodeToken = BoundNodeToken.BNT_BINEX
     Public OP As BoundBinOperator
     Public Left As BoundExpression
     Public Right As BoundExpression
@@ -11,7 +12,6 @@
         Right = rit
 
         typ = OP.ResultType
-        tok = BoundNodeToken.BNT_BINEX
     End Sub
 
     ' /////////////////////////////////////////////////////////////////////////////////

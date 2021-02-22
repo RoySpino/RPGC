@@ -78,6 +78,9 @@ Public Enum TokenKind
     TK_BIFYEARS
     TK_BITOFF
     TK_BITON
+    TK_BLOCKEND
+    TK_BLOCKSTART
+    TK_BLOCKSYNTX
     TK_BYNARYEXPR
     TK_CAB
     TK_CALL
@@ -93,6 +96,7 @@ Public Enum TokenKind
     TK_COLON
     TK_COMMIT
     TK_COMP
+    TK_COMPLATIONUNT
     TK_DATE
     TK_DATETIME
     TK_DEALLOC
@@ -119,6 +123,7 @@ Public Enum TokenKind
     TK_EXCEPT
     TK_EXFMT
     TK_EXPONENT
+    TK_EXPRNSTMNT
     TK_EXSR
     TK_EXTRCT
     TK_FEOD
@@ -378,4 +383,8 @@ Public Enum TokenKind
     TK_ZADD
     TK_ZONED
     TK_ZSUB
+    TK_INZ
+    TK_VARDECLR
+    TK_VARDDATAS
+    TK_VARDCONST
 End Enum

@@ -1,6 +1,7 @@
 ﻿Public Class BoundVariableExpression
     Inherits BoundExpression
 
+    Public Overrides Property tok As BoundNodeToken = BoundNodeToken.BNT_VAREX
     Public Name As String
     Public Variable As VariableSymbol
 
@@ -8,7 +9,6 @@
         Variable = _var
         typ = _var.GetType()
         Name = _var.name
-        tok = BoundNodeToken.BNT_VAREX
     End Sub
 
 End Class

@@ -1,6 +1,7 @@
 ﻿Public Class BoundUniExpression
     Inherits BoundExpression
 
+    Public Overrides Property tok As BoundNodeToken = BoundNodeToken.BNT_UINEX
     Public OP As BoundUniOperator
     Public right As BoundExpression
 
@@ -9,7 +10,6 @@
         right = operand
 
         typ = operand.typ
-        tok = BoundNodeToken.BNT_UINEX
     End Sub
 
     ' /////////////////////////////////////////////////////////////////////////////////

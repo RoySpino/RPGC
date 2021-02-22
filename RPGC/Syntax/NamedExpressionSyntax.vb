@@ -1,10 +1,10 @@
 ﻿Public Class NamedExpressionSyntax
     Inherits ExpresionSyntax
 
+    Public Overrides Property kind As TokenKind = TokenKind.TK_NAMEDEXP
     Public Property IDENTIFIERTOKEN As SyntaxNode
 
     Public Sub New(identifier As SyntaxToken)
         IDENTIFIERTOKEN = identifier
-        kind = TokenKind.TK_NAMEDEXP
     End Sub
 End Class
