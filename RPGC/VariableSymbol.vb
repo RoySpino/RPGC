@@ -1,9 +1,11 @@
 ﻿Public Class VariableSymbol
-    Public name As String
-    Public _type As Type
+    Public Property name As String
+    Public Property _type As Type
+    Public Property IsReadOnly As Boolean
 
-    Public Sub New(nam As String, typ As Type)
+    Public Sub New(nam As String, typ As Type, Optional cons As Boolean = False)
         name = nam
         _type = typ
+        IsReadOnly = cons
     End Sub
 End Class

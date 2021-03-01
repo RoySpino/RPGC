@@ -35,9 +35,29 @@ Public Class Binder
                 Return BindBlockStatement(syntax)
             Case TokenKind.TK_EXPRNSTMNT
                 Return BindExpressionStatement(syntax)
+            Case TokenKind.TK_VARDECLR
+                Return BindVariableDeclaration(syntax)
             Case Else
                 Throw New Exception(String.Format("Unexpected Syntax {0}", syntax.kind))
         End Select
+    End Function
+
+    Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
+        Dim name As String
+        Dim isReadOnly As Boolean
+        Dim expression As BoundExpression
+        Dim variable As VariableSymbol
+
+        name = syntax.Identifier.sym.ToString()
+        isReadOnly = (syntax.kind = TokenKind.TK_VARDCONST)
+        expression = BindExpression(syntax.Initilizer)
+        variable = New VariableSymbol(name, expression.typ, isReadOnly)
+
+        If scope.declareVar(variable) = False Then
+            diagnostics.reportVariableAlreadyDeclared(syntax.Span, name)
+        End If
+
+        Return New BoundVariableDeclaration(variable, expression)
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////////////
@@ -45,12 +65,15 @@ Public Class Binder
         Dim statements As ImmutableArray(Of BoundStatement).Builder
         Dim statement As BoundStatement
 
+        scope = New BoundScope(scope)
         statements = ImmutableArray.CreateBuilder(Of BoundStatement)()
 
         For Each syntaxStatement As StatementSyntax In syntax.Statements
             statement = BindStatements(syntaxStatement)
             statements.Add(statement)
         Next
+
+        scope = scope.Parant
 
         Return New BoundBlockStatement(statements.ToImmutable())
     End Function
@@ -136,19 +159,23 @@ Public Class Binder
 
         Dim name As String
         Dim boundExp As BoundExpression
-        Dim _var, existingVar As VariableSymbol
+        Dim _var As VariableSymbol = Nothing
 
         name = syntax.IDENTIFIERTOKEN.sym.ToString()
         boundExp = BindExpression(syntax.EXPRESSION)
 
         If scope.lookupVar(name, _var) = False Then
-            _var = New VariableSymbol(name, boundExp.typ)
-            scope.declareVar(_var)
+            diagnostics.reportUndefinedName(syntax.IDENTIFIERTOKEN.Span, name)
+            Return boundExp
+        End If
+
+        If _var.IsReadOnly = True Then
+            diagnostics.reportAssignmentOfConstantVar(syntax.IDENTIFIERTOKEN.Span, name)
         End If
 
         If boundExp.typ <> _var._type Then
-            'diagnostics.reportVariableAlreadyDeclared(syntax.IDENTIFIERTOKEN.Span, name)
-            diagnostics.reportCannotConvertType(syntax.EXPRESSION.Span, name, boundExp.typ, _var._type)
+            diagnostics.reportVariableAlreadyDeclared(syntax.IDENTIFIERTOKEN.Span, name)
+            'diagnostics.reportCannotConvertType(syntax.EXPRESSION.Span, name, boundExp.typ, _var._type)
             Return boundExp
         End If
 
@@ -213,6 +240,7 @@ Public Enum BoundNodeToken
     BNT_BINEX
     BNT_EXPRSTMT
     BNT_BLOCKSTMT
+    BNT_VARDECLR
 End Enum
 Public Enum BoundUniOpToken
     BUO_IDENTITY

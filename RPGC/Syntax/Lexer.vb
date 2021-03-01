@@ -315,11 +315,17 @@
             nextChar()
         End While
 
+        ' get any declaration keywords
+        If symbol.ToUpper() = "DCL" And peek(0) = "-" Then
+            symbol = getDeclaration(symbol)
+        End If
+
         ' assign keyword token
         kind = SyntaxFacts.getKeywordKind(symbol)
 
         ' chech if symbol Is a valid variabel name
         If (kind = TokenKind.TK_BADTOKEN) Then
+            ' chech if symbol is a valid variabel name
             If (SyntaxFacts.isValidVariable(symbol)) Then
                 value = symbol
                 kind = TokenKind.TK_IDENTIFIER
@@ -330,6 +336,38 @@
         onEvalLine = chkOnEvalLine(symbol)
 
         Return symbol
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////
+    Private Function getDeclaration(declar As String) As String
+        Dim ret As String
+        Dim peekchar As String
+        Dim pidx As Integer
+
+        ret = declar
+        peekchar = peek(pidx)
+
+        ' get declaration symbol
+        While peekchar > 32
+            ret += peekchar
+            pidx += 1
+            peekchar = peek(pidx)
+        End While
+
+        ' assign keyword token
+        kind = SyntaxFacts.getKeywordKind(ret)
+
+        ' If the Then symbol Is Not a declaration Return the original symbol
+        ' otherwise return the declaration symbol
+        If kind = TokenKind.TK_IDENTIFIER Then
+            Return declar
+        Else
+            For i As Integer = 0 To (pidx - 1)
+                nextChar()
+            Next
+        End If
+
+        Return ret
     End Function
 
     ' ////////////////////////////////////////////////////////////////////////////////////

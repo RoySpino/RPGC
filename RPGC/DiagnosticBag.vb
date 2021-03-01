@@ -168,6 +168,10 @@ Public Class DiagnosticBag
         Return GetEnumerator()
     End Function
 
+    Friend Sub reportAssignmentOfConstantVar(span As TextSpan, name As String)
+        Throw New NotImplementedException()
+    End Sub
+
     ' //////////////////////////////////////////////////////////////////////////
     Public Sub AddRange(a As DiagnosticBag)
         If a Is Nothing = False Then

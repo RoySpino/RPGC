@@ -1,6 +1,7 @@
 ﻿Public Class BoundAssignmentExpression
     Inherits BoundExpression
 
+    Public Overrides Property tok As BoundNodeToken = BoundNodeToken.BNT_ASNEX
     Public expression As BoundExpression
     Public Variable As VariableSymbol
 

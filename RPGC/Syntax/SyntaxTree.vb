@@ -28,7 +28,7 @@
     Public Shared Function Parce(txt As String) As SyntaxTree
         Dim SourceText As SourceText = SourceText.from(txt)
 
-        Return New SyntaxTree(SourceText)
+        Return Parce(SourceText)
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////

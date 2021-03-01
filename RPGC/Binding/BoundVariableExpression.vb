@@ -7,7 +7,7 @@
 
     Public Sub New(_var As VariableSymbol)
         Variable = _var
-        typ = _var.GetType()
+        typ = _var._type
         Name = _var.name
     End Sub
 

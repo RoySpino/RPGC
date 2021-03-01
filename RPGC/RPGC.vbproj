@@ -99,6 +99,7 @@
     <Compile Include="Binding\BoundStatement.vb" />
     <Compile Include="Binding\BoundUniExpression.vb" />
     <Compile Include="Binding\BoundUniOperator.vb" />
+    <Compile Include="Binding\BoundVariableDeclaration.vb" />
     <Compile Include="Binding\BoundVariableExpression.vb" />
     <Compile Include="Syntax\UinaryExpressionSyntax.vb" />
     <Compile Include="Complation.vb" />
