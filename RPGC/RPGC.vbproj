@@ -101,6 +101,9 @@
     <Compile Include="Binding\BoundUniOperator.vb" />
     <Compile Include="Binding\BoundVariableDeclaration.vb" />
     <Compile Include="Binding\BoundVariableExpression.vb" />
+    <Compile Include="Binding\BoundIfStatement.vb" />
+    <Compile Include="Syntax\ElseStatementSyntax.vb" />
+    <Compile Include="Syntax\IfStatementSyntax.vb" />
     <Compile Include="Syntax\UinaryExpressionSyntax.vb" />
     <Compile Include="Complation.vb" />
     <Compile Include="DiagnosticBag.vb" />

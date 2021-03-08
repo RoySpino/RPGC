@@ -54,7 +54,7 @@ Module Module1
             outLn = sbuilder.ToString()
 
             stree = SyntaxTree.Parce(outLn)
-            If (isBlank = False And stree.getDiagnostics().Any() = False) Then
+            If (isBlank = False And stree.getDiagnostics().Any()) Then
                 Continue While
             End If
 

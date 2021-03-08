@@ -61,8 +61,38 @@ Public Class SyntaxFacts
                 Return TokenKind.TK_ADD
             Case "AND"
                 Return TokenKind.TK_AND
+            Case "BEGSR"
+                ' return TokenKind.TK_SUBRTNDCL
+                Return TokenKind.TK_BLOCKSTART
             Case "DIV"
                 Return TokenKind.TK_DIV
+            Case "DCL-C"
+                Return TokenKind.TK_VARDCONST
+            Case "DCL-DS"
+                Return TokenKind.TK_VARDDATAS
+            Case "DCL-PROC"
+                ' return TokenKind.TK_VARDECLR
+                Return TokenKind.TK_BLOCKSTART
+            Case "DCL-S"
+                Return TokenKind.TK_VARDECLR
+            Case "ELSE"
+                Return TokenKind.TK_ELSE
+            Case "END-PROC"
+                Return TokenKind.TK_ENDPROC
+            Case "ENDDO"
+                Return TokenKind.TK_ENDDO
+            Case "ENDIF"
+                Return TokenKind.TK_ENDIF
+            Case "ENDFOR"
+                Return TokenKind.TK_ENDFOR
+            Case "ENDMON"
+                Return TokenKind.TK_ENDMON
+            Case "ENDSL"
+                Return TokenKind.TK_ENDSL
+            Case "ENDSR"
+                Return TokenKind.TK_ENDSR
+            Case "END"
+                Return TokenKind.TK_BLOCKEND
             Case "IF"
                 Return TokenKind.TK_IF
             Case "IFEQ"
@@ -77,6 +107,8 @@ Public Class SyntaxFacts
                 Return TokenKind.TK_LT
             Case "IFNE"
                 Return TokenKind.TK_NE
+            Case "INT10"
+                Return TokenKind.TK_INTEGER
             Case "MOVE"
                 Return TokenKind.TK_ASSIGN
             Case "MOVEA"
@@ -87,8 +119,12 @@ Public Class SyntaxFacts
                 Return TokenKind.TK_NOT
             Case "MULT"
                 Return TokenKind.TK_MULT
+            Case "MONITOR"
+                Return TokenKind.TK_MONITOR
             Case "OR"
                 Return TokenKind.TK_OR
+            Case "SELECT"
+                Return TokenKind.TK_SELECT
             Case "SUB"
                 Return TokenKind.TK_SUB
             Case Else

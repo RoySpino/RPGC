@@ -27,6 +27,18 @@ Public Class Binder
                 Throw New Exception(String.Format("Unexpected Syntax {0}", syntax.kind))
         End Select
     End Function
+    ' ///////////////////////////////////////////////////////////////////////////////
+    Public Function BindExpression(syntax As ExpresionSyntax, expectedResult As Type) As BoundExpression
+        Dim result As BoundExpression
+
+        result = BindExpression(syntax)
+
+        If result.typ <> expectedResult Then
+            diagnostics.reportCannotConvert(syntax.Span, result.typ, expectedResult)
+        End If
+
+        Return result
+    End Function
 
     ' ///////////////////////////////////////////////////////////////////////////////
     Private Function BindStatements(syntax As StatementSyntax) As BoundStatement
@@ -37,11 +49,34 @@ Public Class Binder
                 Return BindExpressionStatement(syntax)
             Case TokenKind.TK_VARDECLR
                 Return BindVariableDeclaration(syntax)
+            Case TokenKind.TK_IF
+                Return BindIfStatement(syntax)
             Case Else
                 Throw New Exception(String.Format("Unexpected Syntax {0}", syntax.kind))
         End Select
     End Function
 
+    ' ///////////////////////////////////////////////////////////////////////////////
+    Private Function BindIfStatement(syntax As IfStatementSyntax) As BoundIfStatement
+        Dim condition As BoundExpression
+        Dim thenStatement As BoundStatement
+        Dim elseStatement As BoundStatement
+
+        ' set condition and then statments
+        condition = BindExpression(syntax.Condition, GetType(Boolean))
+        thenStatement = BindStatements(syntax.ThenStatement)
+
+        ' set else statement
+        If syntax.ElseBlock Is Nothing = False Then
+            elseStatement = BindStatements(syntax.ElseBlock.ElseStatement)
+        Else
+            elseStatement = Nothing
+        End If
+
+        Return New BoundIfStatement(condition, thenStatement, elseStatement)
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////////
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
         Dim name As String
         Dim isReadOnly As Boolean
@@ -241,6 +276,7 @@ Public Enum BoundNodeToken
     BNT_EXPRSTMT
     BNT_BLOCKSTMT
     BNT_VARDECLR
+    BNT_IFSTMT
 End Enum
 Public Enum BoundUniOpToken
     BUO_IDENTITY

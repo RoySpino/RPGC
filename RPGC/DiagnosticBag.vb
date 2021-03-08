@@ -44,6 +44,10 @@ Public Class DiagnosticBag
         report(span, message)
     End Sub
 
+    Friend Sub reportCannotConvert(span As TextSpan, type As Object, expectedResult As Type)
+        Throw New NotImplementedException()
+    End Sub
+
     ' //////////////////////////////////////////////////////////////////////////
     Public Sub reportUndefinedUniaryOp(span As TextSpan, opSym As String, opType As Type)
         Dim message As String
@@ -152,6 +156,15 @@ Public Class DiagnosticBag
         report(span, message)
     End Sub
 
+    ' //////////////////////////////////////////////////////////////////////////
+    Friend Sub reportAssignmentOfConstantVar(span As TextSpan, name As String)
+        Dim message As String
+
+        message = String.Format("rpgc:({1},{2}): error: assignment of read-only variable ‘{0}’", name, span.LineNo, span.LinePos)
+
+        report(span, message)
+    End Sub
+
 
     ' //////////////////////////////////////////////////////////////////////////
     Public Function GetEnumerator() As IEnumerator
@@ -167,10 +180,6 @@ Public Class DiagnosticBag
     Private Function IEnumerable_GetEnumerator1() As IEnumerator Implements IEnumerable.GetEnumerator
         Return GetEnumerator()
     End Function
-
-    Friend Sub reportAssignmentOfConstantVar(span As TextSpan, name As String)
-        Throw New NotImplementedException()
-    End Sub
 
     ' //////////////////////////////////////////////////////////////////////////
     Public Sub AddRange(a As DiagnosticBag)

@@ -387,4 +387,5 @@ Public Enum TokenKind
     TK_VARDECLR
     TK_VARDDATAS
     TK_VARDCONST
+    TK_ENDPROC
 End Enum

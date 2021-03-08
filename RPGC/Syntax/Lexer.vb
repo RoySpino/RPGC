@@ -13,6 +13,8 @@
     Private doFreeLex As Boolean = True
     Private lineElem As List(Of StructNode)
     Private strucLexLine As List(Of SyntaxToken) = New List(Of SyntaxToken)()
+    Private lineType As String = ""
+    Private parenCnt As Integer = 0
 
     Private start As Integer
     Private kind As TokenKind
@@ -63,26 +65,25 @@
     End Function
 
     ' ////////////////////////////////////////////////////////////////////////////////////
-    Private Sub swap(ByRef a As StructNode, ByRef b As StructNode)
-        Dim tmp As StructNode
-
-        tmp = a
-        a = b
-        b = tmp
-    End Sub
-
-    ' ////////////////////////////////////////////////////////////////////////////////////
-    Private Function decToInd(ind As String) As String
-        Return "*IN" & ind
-    End Function
-
-    ' ////////////////////////////////////////////////////////////////////////////////////
     Private Function getAssignmentOrComparisonToken()
         Dim ret As TokenKind
 
-        ' fist [=] is an assignment all others are comparisons
-        ' reset on new line
+        ' if the [=] is inside a parethisies then its a comparison
+        onEvalLine = parenCnt.Equals(0)
+
+        ' if the line started with a comparison keyword then its a comparison
+        Select Case lineType
+            Case "DOU",
+                 "DOW",
+                 "IF",
+                 "FOR",
+                 "WHEN"
+                onEvalLine = False
+        End Select
+
+        ' check if the current line is a comparison or assignment
         If onEvalLine = True Then
+            ' first = is an assignment all others are comparisons
             ret = TokenKind.TK_ASSIGN
             onEvalLine = False
         Else
@@ -127,10 +128,19 @@
         Return ret
     End Function
     ' ////////////////////////////////////////////////////////////////////////////////////
-    Private Function chkOnEvalLine(symbol As String) As Boolean
-        Return (symbol.Contains("EVAL") Or symbol = "IF" Or symbol = "FOR" Or
-                    symbol = "WHEN" Or symbol = "CALLP" Or symbol = "DOW" Or symbol = "DOU")
-
+    Private Function chkOnBooleanLine(symbol As String) As Boolean
+        Select Case symbol
+            Case "IF",
+                 "WHEN",
+                 "DOW",
+                 "DOU",
+                 "AND",
+                 "OR",
+                 "NOT"
+                Return True
+            Case Else
+                Return False
+        End Select
     End Function
 
     ' ////////////////////////////////////////////////////////////////////////////////////
@@ -203,11 +213,13 @@
                 kind = TokenKind.TK_PARENOPEN
                 value = "("
                 nextChar()
+                parenCnt += 1
             Case ")"
                 start += 1
                 kind = TokenKind.TK_PARENCLOSE
                 value = ")"
                 nextChar()
+                parenCnt -= 1
             Case "="
                 start += 1
                 kind = getAssignmentOrComparisonToken()
@@ -295,12 +307,23 @@
         Dim symbol As String = ""
 
         start = pos
+
+        ' at end of line check for end/start of a block
+        ' otherwise set kind to space token
+        If lineType.Length > 0 And (Asc(curChar) = 10 Or Asc(curChar) = 13) Then
+            ' get and reset linetype
+            getLineType(lineType)
+            lineType = ""
+        Else
+            kind = TokenKind.TK_SPACE
+        End If
+
+        ' skip whitespace
         While (Char.IsWhiteSpace(curChar) = True)
             symbol += curChar
             nextChar()
         End While
 
-        kind = TokenKind.TK_SPACE
         value = ""
         start += 1
     End Sub
@@ -310,30 +333,36 @@
         Dim symbol As String = ""
 
         start = pos
-        While (Char.IsLetter(curChar) = True)
+        While (Char.IsLetter(curChar) Or (symbol.Length > 1 And Char.IsLetterOrDigit(curChar)) Or
+                   curChar = "#" Or curChar = "@" Or curChar = "$" Or (symbol.Length > 1 And curChar = "_"))
             symbol += curChar
             nextChar()
         End While
 
+        symbol = symbol.ToUpper()
+
         ' get any declaration keywords
-        If symbol.ToUpper() = "DCL" And peek(0) = "-" Then
+        If (symbol = "DCL" Or symbol = "END") And curChar = "-" Then
             symbol = getDeclaration(symbol)
         End If
+
+        ' check if the symbol is a start/end of a block
+        setLineType(symbol)
 
         ' assign keyword token
         kind = SyntaxFacts.getKeywordKind(symbol)
 
         ' chech if symbol Is a valid variabel name
-        If (kind = TokenKind.TK_BADTOKEN) Then
+        If (kind = TokenKind.TK_IDENTIFIER) Then
             ' chech if symbol is a valid variabel name
             If (SyntaxFacts.isValidVariable(symbol)) Then
                 value = symbol
                 kind = TokenKind.TK_IDENTIFIER
                 start += 1
             End If
+        Else
+            onEvalLine = chkOnBooleanLine(symbol)
         End If
-
-        onEvalLine = chkOnEvalLine(symbol)
 
         Return symbol
     End Function
@@ -348,14 +377,31 @@
         peekchar = peek(pidx)
 
         ' get declaration symbol
-        While peekchar > 32
+        While Asc(peekchar) > 32
             ret += peekchar
             pidx += 1
             peekchar = peek(pidx)
         End While
 
-        ' assign keyword token
-        kind = SyntaxFacts.getKeywordKind(ret)
+        ret = ret.ToUpper()
+
+        ' check if symbol is a block/block terminator
+        Select Case ret
+            Case "DCL-PROC"
+                kind = TokenKind.TK_BLOCKSTART
+            Case "DCL-PR"
+                kind = TokenKind.TK_VARDDATAS
+            Case "DCL-PI"
+                kind = TokenKind.TK_VARDDATAS
+            Case "DCL-DS"
+                kind = TokenKind.TK_VARDDATAS
+            Case "DCL-S"
+                kind = TokenKind.TK_VARDECLR
+            Case "DCL-C"
+                kind = TokenKind.TK_VARDCONST
+            Case "END-PROC"
+                kind = TokenKind.TK_BLOCKEND
+        End Select
 
         ' If the Then symbol Is Not a declaration Return the original symbol
         ' otherwise return the declaration symbol
@@ -469,6 +515,45 @@
     End Sub
 
     ' ////////////////////////////////////////////////////////////////////////////////////
+    Private Sub getLineType(symbol As String)
+        Select Case symbol
+            Case "BEGSR",
+                 "DCL-PROC",
+                 "DOU",
+                 "DOW",
+                 "ELSE",
+                 "FOR",
+                 "IF",
+                 "MON"
+                kind = TokenKind.TK_BLOCKSTART
+            Case "END-PROC",
+                 "ENDSR",
+                 "ENDDO",
+                 "ENDFOR",
+                 "ENDMON"
+                kind = TokenKind.TK_BLOCKEND
+            Case "ENDIF"
+                kind = TokenKind.TK_ENDIF
+        End Select
+    End Sub
+
+    ' ////////////////////////////////////////////////////////////////////////////////////
+    Private Sub setLineType(symbol As String)
+        If lineType.Length > 0 Then
+            Select Case symbol
+                Case "BEGSR",
+                     "DCL-PROC",
+                     "DOU",
+                     "DOW",
+                     "FOR",
+                     "IF",
+                     "MON",
+                     "ELSE"
+                    lineType = symbol
+            End Select
+        End If
+    End Sub
+
     Public Function getDiagnostics() As DiagnosticBag
         Return diagnostics
     End Function

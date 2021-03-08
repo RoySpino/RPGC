@@ -204,16 +204,48 @@ Public Class Parser
         Return New LiteralExpressionSyntax(numberToken)
     End Function
 
-    Private Function parseStaement() As StatementSyntax
+    Private Function parseStaement(Optional blockEndToken As TokenKind = TokenKind.TK_BLOCKEND) As StatementSyntax
         Select Case current.kind
             Case TokenKind.TK_BLOCKSTART
-                Return parseBlockStaement()
+                Return parseBlockStaement(blockEndToken)
+            Case TokenKind.TK_IF
+                Return parseIfStaement()
             Case TokenKind.TK_VARDCONST,
                  TokenKind.TK_VARDECLR
                 Return parseVariableDeclaration()
             Case Else
                 Return parseExpressionStaement()
         End Select
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////
+    Private Function parseIfStaement() As IfStatementSyntax
+        Dim keyword As SyntaxToken
+        Dim condition As ExpresionSyntax
+        Dim statement As StatementSyntax
+        Dim elseClause As ElseStatementSyntax
+
+        keyword = match(TokenKind.TK_IF)
+        condition = parceExpression()
+        statement = parseStaement(TokenKind.TK_ENDIF)
+        elseClause = parseElseStaement()
+
+        Return New IfStatementSyntax(keyword, condition, statement, elseClause)
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////
+    Private Function parseElseStaement() As ElseStatementSyntax
+        Dim keyword As SyntaxToken
+        Dim statement As StatementSyntax
+
+        If current.kind <> TokenKind.TK_ELSE Then
+            Return Nothing
+        End If
+
+        keyword = nextToken()
+        statement = parseStaement(TokenKind.TK_ENDIF)
+
+        Return New ElseStatementSyntax(keyword, statement)
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////
@@ -225,14 +257,13 @@ Public Class Parser
 
     ' ///////////////////////////////////////////////////////////////////////
     Private Function parseVariableDeclaration() As StatementSyntax
-        Dim expected, typeToken As TokenKind
+        Dim expected As TokenKind
         Dim keyworkd, identifier, initKeyWord As SyntaxToken
         Dim initilize As ExpresionSyntax
         Dim typ As Type
 
         Select Case current.kind
-            Case TokenKind.TK_VARDDATAS,
-                 TokenKind.TK_VARDCONST
+            Case TokenKind.TK_VARDCONST
                 expected = current.kind
             Case Else
                 expected = TokenKind.TK_VARDECLR
@@ -241,24 +272,23 @@ Public Class Parser
 
         keyworkd = match(expected)
         identifier = match(TokenKind.TK_IDENTIFIER)
-        typeToken = current.kind
         nextToken()
-        initKeyWord = match(TokenKind.TK_INZ)
-        initilize = parceExpression()
 
-        ' get variable Type
-        Select Case typeToken
-            Case TokenKind.TK_INTEGER
-                typ = GetType(Int32)
-            Case Else
-                typ = GetType(Int32)
-        End Select
+        ' add varialbe initilizer
+        If peek(0).kind = TokenKind.TK_INZ Then
+            nextToken()
+            initKeyWord = match(TokenKind.TK_INZ)
+            initilize = parceExpression()
+        Else
+            initKeyWord = Nothing
+            initilize = Nothing
+        End If
 
-        Return New VariableDeclarationSyntax(keyworkd, identifier, typ, initKeyWord, initilize)
+        Return New VariableDeclarationSyntax(keyworkd, identifier, GetType(Int32), initKeyWord, initilize)
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////
-    Private Function parseBlockStaement() As StatementSyntax
+    Private Function parseBlockStaement(Optional blockEndToken As TokenKind = TokenKind.TK_BLOCKEND) As StatementSyntax
         Dim statements As ImmutableArray(Of StatementSyntax).Builder
         Dim openStatementToken As SyntaxToken
         Dim closeStatementToken As SyntaxToken
@@ -266,12 +296,13 @@ Public Class Parser
 
         statements = ImmutableArray.CreateBuilder(Of StatementSyntax)()
         openStatementToken = match(TokenKind.TK_BLOCKSTART)
-        closeStatementToken = match(TokenKind.TK_BLOCKEND)
 
-        While (current.kind <> TokenKind.TK_EOI And current.kind <> TokenKind.TK_BLOCKEND)
+        While (current.kind <> TokenKind.TK_EOI And current.kind <> blockEndToken And current.kind <> TokenKind.TK_BLOCKEND)
             statmt = parseStaement()
             statements.Add(statmt)
         End While
+
+        closeStatementToken = match(blockEndToken)
 
         Return New BlockStatementSyntax(openStatementToken, statements.ToImmutable(), closeStatementToken)
     End Function

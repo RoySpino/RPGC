@@ -90,10 +90,40 @@
                 evaluateBlockStatemnt(node)
             Case BoundNodeToken.BNT_EXPRSTMT
                 evaluateExpressionStatement(node)
+            Case BoundNodeToken.BNT_VARDECLR
+                evaluateVariableDaclaration(node)
+            Case BoundNodeToken.BNT_IFSTMT
+                evaluateIfStatement(node)
             Case Else
                 Throw New Exception(String.Format("unexpected token {0}", ROOT.tok))
         End Select
     End Function
+
+    ' //////////////////////////////////////////////////////////////
+    Private Sub evaluateIfStatement(node As BoundIfStatement)
+        Dim conditionValue As Boolean
+
+        conditionValue = EvaluatExpression(node.Condition)
+
+        '  on true evaluate then block
+        If conditionValue = True Then
+            EvaluatStatement(node.ThenStatement)
+        Else
+            ' check if tehre is a 
+            If node.ElseStatement Is Nothing = False Then
+                EvaluatStatement(node.ElseStatement)
+            End If
+        End If
+    End Sub
+
+    ' //////////////////////////////////////////////////////////////
+    Private Sub evaluateVariableDaclaration(node As BoundVariableDeclaration)
+        Dim value As Object
+
+        value = EvaluatExpression(node.Initalizer)
+        variables(node.Variable) = value
+        lastValue = value
+    End Sub
 
     ' //////////////////////////////////////////////////////////////
     Private Sub evaluateBlockStatemnt(node As BoundBlockStatement)

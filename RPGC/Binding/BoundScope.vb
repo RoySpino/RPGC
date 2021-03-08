@@ -19,7 +19,7 @@ Public Class BoundScope
     End Function
 
     ' ////////////////////////////////////////////////////////////////////////////////
-    Public Function lookupVar(name As String, var As VariableSymbol) As Boolean
+    Public Function lookupVar(name As String, ByRef var As VariableSymbol) As Boolean
         ' try to find the variale within this scope
         If variables.TryGetValue(name, var) = True Then
             Return True
