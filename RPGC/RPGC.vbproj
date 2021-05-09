@@ -67,6 +67,9 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -97,11 +100,13 @@
     <Compile Include="Binding\BoundNode.vb" />
     <Compile Include="Binding\BoundScope.vb" />
     <Compile Include="Binding\BoundStatement.vb" />
+    <Compile Include="Binding\BoundTreeRewriter.vb" />
     <Compile Include="Binding\BoundUniExpression.vb" />
     <Compile Include="Binding\BoundUniOperator.vb" />
     <Compile Include="Binding\BoundVariableDeclaration.vb" />
     <Compile Include="Binding\BoundVariableExpression.vb" />
     <Compile Include="Binding\BoundIfStatement.vb" />
+    <Compile Include="Lowering\Lowerer.vb" />
     <Compile Include="Syntax\ElseStatementSyntax.vb" />
     <Compile Include="Syntax\IfStatementSyntax.vb" />
     <Compile Include="Syntax\UinaryExpressionSyntax.vb" />

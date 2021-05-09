@@ -1,5 +1,5 @@
 ﻿Public Class BoundExpression
     Inherits BoundNode
 
-    Public typ As Type
+    Public Property typ As Type
 End Class
