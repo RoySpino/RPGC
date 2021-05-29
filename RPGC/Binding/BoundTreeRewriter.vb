@@ -31,7 +31,7 @@ Public Class BoundTreeRewriter
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Function rewriteExpression(node As BoundExpression)
+    Public Function rewriteExpression(node As BoundExpression) As BoundExpression
         Select Case node.tok
             Case BoundNodeToken.BNT_UINEX
                 Return rewriteUniaryExpression(node)
@@ -49,7 +49,7 @@ Public Class BoundTreeRewriter
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Private Function rewriteBinaryExpression(node As BoundBinExpression) As Object
+    Private Function rewriteBinaryExpression(node As BoundBinExpression) As BoundExpression
         Dim left, right As BoundExpression
 
         left = rewriteExpression(node.Left)
@@ -63,7 +63,7 @@ Public Class BoundTreeRewriter
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Private Function rewriteAssignmentExpression(node As BoundAssignmentExpression) As Object
+    Private Function rewriteAssignmentExpression(node As BoundAssignmentExpression) As BoundExpression
         Dim expression As BoundExpression
 
         expression = rewriteExpression(node.expression)
@@ -75,17 +75,17 @@ Public Class BoundTreeRewriter
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Private Function rewriteVariableExpression(node As BoundVariableExpression) As Object
+    Private Function rewriteVariableExpression(node As BoundVariableExpression) As BoundExpression
         Return node
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Private Function rewriteLiteralExpression(node As BoundLiteralExp) As Object
+    Private Function rewriteLiteralExpression(node As BoundLiteralExp) As BoundExpression
         Return node
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Private Function rewriteUniaryExpression(node As BoundUniExpression) As Object
+    Private Function rewriteUniaryExpression(node As BoundUniExpression) As BoundExpression
         Dim operand As BoundExpression
 
         operand = rewriteExpression(node.right)
@@ -100,7 +100,7 @@ Public Class BoundTreeRewriter
     ' /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteBoundGoToConditinalStatement(node As BoundGoToConditionalStatement) As BoundStatement
-        Dim condition As Object
+        Dim condition As BoundExpression
         condition = rewriteExpression(node.Condition)
 
         If condition.Equals(node) Then
@@ -190,7 +190,7 @@ Public Class BoundTreeRewriter
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteVariableDeclaration(node As BoundVariableDeclaration) As BoundStatement
-        Dim initilizer As Object
+        Dim initilizer As BoundExpression
 
         initilizer = rewriteExpression(node.Initalizer)
 
