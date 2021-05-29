@@ -277,6 +277,12 @@ Public Enum BoundNodeToken
     BNT_BLOCKSTMT
     BNT_VARDECLR
     BNT_IFSTMT
+    BNT_GOTOCOND
+    BNT_WHILESTMT
+    BNT_FORSTMT
+    BNT_DOUNTIL
+    BNT_LABEL
+    BNT_GOTO
 End Enum
 Public Enum BoundUniOpToken
     BUO_IDENTITY

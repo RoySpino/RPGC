@@ -95,7 +95,11 @@
     <Compile Include="Binding\BoundBlockStatement.vb" />
     <Compile Include="Binding\BoundExpression.vb" />
     <Compile Include="Binding\BoundExpressionStatement.vb" />
+    <Compile Include="Binding\BoundForStatement.vb" />
     <Compile Include="Binding\BoundGlobalScope.vb" />
+    <Compile Include="Binding\BoundGoToConditionalStatement.vb" />
+    <Compile Include="Binding\BoundGoToStatement.vb" />
+    <Compile Include="Binding\BoundLabelStatement.vb" />
     <Compile Include="Binding\BoundLiteralExp.vb" />
     <Compile Include="Binding\BoundNode.vb" />
     <Compile Include="Binding\BoundScope.vb" />
@@ -103,9 +107,12 @@
     <Compile Include="Binding\BoundTreeRewriter.vb" />
     <Compile Include="Binding\BoundUniExpression.vb" />
     <Compile Include="Binding\BoundUniOperator.vb" />
+    <Compile Include="Binding\BoundUntilStatement.vb" />
     <Compile Include="Binding\BoundVariableDeclaration.vb" />
     <Compile Include="Binding\BoundVariableExpression.vb" />
     <Compile Include="Binding\BoundIfStatement.vb" />
+    <Compile Include="Binding\BoundWhileStatement.vb" />
+    <Compile Include="LabelSymbol.vb" />
     <Compile Include="Lowering\Lowerer.vb" />
     <Compile Include="Syntax\ElseStatementSyntax.vb" />
     <Compile Include="Syntax\IfStatementSyntax.vb" />

@@ -1,7 +1,7 @@
 ﻿Imports System.IO
 Imports System.Reflection
 
-Public Class BoundNode
+Public MustInherit Class BoundNode
     Public Overridable Property tok As BoundNodeToken
 
     Public Iterator Function getChildren() As IEnumerable(Of BoundNode)
@@ -141,7 +141,7 @@ Public Class BoundNode
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////
     Public Sub writeTo(writer As TextWriter)
-        printTree()
+        printTree(writer, Me)
     End Sub
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////
