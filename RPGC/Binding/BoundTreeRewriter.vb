@@ -48,27 +48,50 @@
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Private Function rewriteBinaryExpression(node As BoundBinExpression) As Object
-        Throw New NotImplementedException()
+        Dim left, right As BoundExpression
+
+        left = rewriteExpression(node.Left)
+        right = rewriteExpression(node.Right)
+
+        If left.Equals(node.Left) And right.Equals(node.Right) Then
+            Return node
+        End If
+
+        Return New BoundBinExpression(left, node.OP, right)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Private Function rewriteAssignmentExpression(node As BoundAssignmentExpression) As Object
-        Throw New NotImplementedException()
+        Dim expression As BoundExpression
+
+        expression = rewriteExpression(node.expression)
+        If expression.Equals(node.expression) Then
+            Return node
+        End If
+
+        Return New BoundAssignmentExpression(node.Variable, expression)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Private Function rewriteVariableExpression(node As BoundVariableExpression) As Object
-        Throw New NotImplementedException()
+        Return node
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Private Function rewriteLiteralExpression(node As BoundLiteralExp) As Object
-        Throw New NotImplementedException()
+        Return node
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Private Function rewriteUniaryExpression(node As BoundUniExpression) As Object
-        Throw New NotImplementedException()
+        Dim operand As BoundExpression
+
+        operand = rewriteExpression(node.right)
+        If operand.Equals(node.right) Then
+            Return node
+        End If
+
+        Return New BoundUniExpression(node.OP, operand)
     End Function
 
     ' ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
