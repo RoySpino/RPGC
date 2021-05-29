@@ -1,4 +1,6 @@
-﻿Public Class BoundTreeRewriter
+﻿Imports System.Collections.Immutable
+
+Public Class BoundTreeRewriter
     Inherits BoundNode
 
     Public Function rewriteStatement(node As BoundStatement) As BoundStatement
@@ -98,51 +100,149 @@
     ' /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteBoundGoToConditinalStatement(node As BoundGoToConditionalStatement) As BoundStatement
-        Throw New NotImplementedException()
+        Dim condition As Object
+        condition = rewriteExpression(node.Condition)
+
+        If condition.Equals(node) Then
+            Return node
+        End If
+
+        Return New BoundGoToConditionalStatement(node.Label, condition, node.JumpWhenFalse)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteBoundGoToStatement(node As BoundGoToStatement) As BoundStatement
-        Throw New NotImplementedException()
+        Return node
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteBoundLabelStatement(node As BoundLabelStatement) As BoundStatement
-        Throw New NotImplementedException()
+        Return node
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteBoundDoUntilStatement(node As BoundUntilStatement) As BoundStatement
-        Throw New NotImplementedException()
+        Dim condition As BoundExpression
+        Dim body As BoundStatement
+
+        condition = rewriteExpression(node.Condition)
+        body = rewriteStatement(node.Body)
+
+        If condition.Equals(node.Condition) And body.Equals(node.Body) Then
+            Return node
+        End If
+
+        Return New BoundUntilStatement(condition, body)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteBoundForStatement(node As BoundForStatement) As BoundStatement
-        Throw New NotImplementedException()
+        Dim lowerBound As BoundExpression
+        Dim uperBound As BoundExpression
+        Dim body As BoundStatement
+
+        lowerBound = rewriteExpression(node.LBound)
+        uperBound = rewriteExpression(node.Ubound)
+        body = rewriteStatement(node.Body)
+
+        If lowerBound.Equals(node.LBound) And uperBound.Equals(node.Ubound) And body.Equals(node.Body) Then
+            Return node
+        End If
+
+        Return New BoundForStatement(node.Variable, lowerBound, uperBound, body, node.IsCountUP)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteBoundWhileStatement(node As BoundWhileStatement) As BoundStatement
-        Throw New NotImplementedException()
+        Dim condition As BoundExpression
+        Dim body As BoundStatement
+
+        condition = rewriteExpression(node.Condition)
+        body = rewriteStatement(node.Body)
+
+        If condition.Equals(node.Condition) And body.Equals(node.Body) Then
+            Return node
+        End If
+
+        Return New BoundWhileStatement(condition, body)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteIfStatement(node As BoundIfStatement) As BoundStatement
-        Throw New NotImplementedException()
+        Dim condition As BoundExpression
+        Dim trueStatementBody As BoundStatement
+        Dim elseStaetmentBody As BoundStatement
+
+        condition = rewriteExpression(node.Condition)
+        trueStatementBody = rewriteStatement(node.ThenStatement)
+        elseStaetmentBody = Nothing
+
+        If node.ElseStatement Is Nothing Then
+            elseStaetmentBody = rewriteStatement(node.ElseStatement)
+        End If
+
+        If condition.Equals(node.Condition) And trueStatementBody.Equals(node.ThenStatement) And elseStaetmentBody.Equals(node.ElseStatement) Then
+            Return node
+        End If
+
+        Return New BoundIfStatement(condition, trueStatementBody, elseStaetmentBody)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteVariableDeclaration(node As BoundVariableDeclaration) As BoundStatement
-        Throw New NotImplementedException()
+        Dim initilizer As Object
+
+        initilizer = rewriteExpression(node.Initalizer)
+
+        If initilizer.Equals(node.Initalizer) Then
+            Return node
+        End If
+
+        Return New BoundVariableDeclaration(node.Variable, initilizer)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteExpressionStatement(node As BoundExpressionStatement) As BoundStatement
-        Throw New NotImplementedException()
+        Dim expression As BoundExpression
+
+        expression = rewriteExpression(node.Expression)
+
+        If expression.Equals(node.Expression) Then
+            Return node
+        End If
+
+        Return New BoundExpressionStatement(expression)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteBlockStatement(boundBlockStatement As BoundBlockStatement) As BoundStatement
-        Throw New NotImplementedException()
+    Public Overridable Function rewriteBlockStatement(node As BoundBlockStatement) As BoundStatement
+        Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
+        Dim oldStatement As BoundStatement
+        Dim newStatement As BoundStatement
+
+        For i As Integer = 0 To (node.Statements.Length - 1)
+            oldStatement = node.Statements(i)
+            newStatement = rewriteStatement(oldStatement)
+
+            If newStatement.Equals(oldStatement) = False Then
+                If builder Is Nothing Then
+                    builder = ImmutableArray.CreateBuilder(Of BoundStatement)(node.Statements.Length)
+
+                    For u As Integer = 0 To (i - 1)
+                        builder.Add(node.Statements(u))
+                    Next
+                End If
+            End If
+
+            If builder Is Nothing = False Then
+                builder.Add(newStatement)
+            End If
+        Next
+
+        If builder Is Nothing = False Then
+            Return node
+        End If
+
+        Return New BoundBlockStatement(builder.MoveToImmutable())
     End Function
 End Class
