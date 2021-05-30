@@ -84,58 +84,58 @@
     End Function
 
     ' //////////////////////////////////////////////////////////////
-    Private Function EvaluatStatement(node As BoundStatement) As Object
-        Select Case node.tok
-            Case BoundNodeToken.BNT_BLOCKSTMT
-                evaluateBlockStatemnt(node)
-            Case BoundNodeToken.BNT_EXPRSTMT
-                evaluateExpressionStatement(node)
-            Case BoundNodeToken.BNT_VARDECLR
-                evaluateVariableDaclaration(node)
-            Case BoundNodeToken.BNT_IFSTMT
-                evaluateIfStatement(node)
-            Case Else
-                Throw New Exception(String.Format("unexpected token {0}", ROOT.tok))
-        End Select
-    End Function
+    'Private Function EvaluatStatement(node As BoundStatement) As Object
+    '    Select Case node.tok
+    '        Case BoundNodeToken.BNT_BLOCKSTMT
+    '            evaluateBlockStatemnt(node)
+    '        Case BoundNodeToken.BNT_EXPRSTMT
+    '            evaluateExpressionStatement(node)
+    '        Case BoundNodeToken.BNT_VARDECLR
+    '            evaluateVariableDaclaration(node)
+    '        Case BoundNodeToken.BNT_IFSTMT
+    '            evaluateIfStatement(node)
+    '        Case Else
+    '            Throw New Exception(String.Format("unexpected token {0}", ROOT.tok))
+    '    End Select
+    'End Function
 
     ' //////////////////////////////////////////////////////////////
-    Private Sub evaluateIfStatement(node As BoundIfStatement)
-        Dim conditionValue As Boolean
-
-        conditionValue = EvaluatExpression(node.Condition)
-
-        '  on true evaluate then block
-        If conditionValue = True Then
-            EvaluatStatement(node.ThenStatement)
-        Else
-            ' check if tehre is a 
-            If node.ElseStatement Is Nothing = False Then
-                EvaluatStatement(node.ElseStatement)
-            End If
-        End If
-    End Sub
-
-    ' //////////////////////////////////////////////////////////////
-    Private Sub evaluateVariableDaclaration(node As BoundVariableDeclaration)
-        Dim value As Object
-
-        value = EvaluatExpression(node.Initalizer)
-        variables(node.Variable) = value
-        lastValue = value
-    End Sub
+    'Private Sub evaluateIfStatement(node As BoundIfStatement)
+    '    Dim conditionValue As Boolean
+    '
+    '    conditionValue = EvaluatExpression(node.Condition)
+    '
+    '    '  on true evaluate then block
+    '    If conditionValue = True Then
+    '        EvaluatStatement(node.ThenStatement)
+    '    Else
+    '        ' check if tehre is a 
+    '        If node.ElseStatement Is Nothing = False Then
+    '            EvaluatStatement(node.ElseStatement)
+    '        End If
+    '    End If
+    'End Sub
 
     ' //////////////////////////////////////////////////////////////
-    Private Sub evaluateBlockStatemnt(node As BoundBlockStatement)
-        For Each statement As BoundStatement In node.Statements
-            EvaluatStatement(statement)
-        Next
-    End Sub
+    'Private Sub evaluateVariableDaclaration(node As BoundVariableDeclaration)
+    '    Dim value As Object
+    '
+    '    value = EvaluatExpression(node.Initalizer)
+    '    variables(node.Variable) = value
+    '    lastValue = value
+    'End Sub
 
     ' //////////////////////////////////////////////////////////////
-    Private Sub evaluateExpressionStatement(stmnt As BoundExpressionStatement)
-        lastValue = EvaluatExpression(stmnt.Expression)
-    End Sub
+    'Private Sub evaluateBlockStatemnt(node As BoundBlockStatement)
+    '    For Each statement As BoundStatement In node.Statements
+    '        EvaluatStatement(statement)
+    '    Next
+    'End Sub
+
+    ' //////////////////////////////////////////////////////////////
+    'Private Sub evaluateExpressionStatement(stmnt As BoundExpressionStatement)
+    '    lastValue = EvaluatExpression(stmnt.Expression)
+    'End Sub
 
     ' //////////////////////////////////////////////////////////////
     Private Function EvaluatExpression(root As BoundExpression) As Object
@@ -195,7 +195,7 @@
             Case BoundUniOpToken.BUO_NOT
                 value = Not Convert.ToBoolean(chameleonOBJ)
             Case Else
-                Throw New Exception(String.Format("unrecognized uinary Operator [{0}] ", uiTmp.tok))
+                Throw New Exception(String.Format("unrecognized uinary Operator ({0}] ", uiTmp.tok))
         End Select
     End Function
 
@@ -242,7 +242,51 @@
 
     ' //////////////////////////////////////////////////////////////
     Public Function Evaluate() As Object
-        EvaluatStatement(ROOT)
+
+        Dim lableToIndex As Dictionary(Of LabelSymbol, Integer)
+        Dim l As BoundLabelStatement
+        Dim s As BoundStatement
+        Dim cgts As BoundGoToConditionalStatement
+        Dim gs As BoundGoToStatement
+        Dim index As Integer
+        Dim cond As Boolean
+
+        lableToIndex = New Dictionary(Of LabelSymbol, Integer)
+
+        For i As Integer = 0 To (ROOT.Statements.Length - 1)
+            If GetType(ROOT.Statements(i)).Equals(GetType(BoundLabelStatement)) Then
+                l = ROOT.Statements(i)
+                lableToIndex.Add(l.Label, i + 1)
+            End If
+
+            index = 0
+
+            While index < ROOT.Statements.Length
+                s = ROOT.Statements(index)
+
+                Select Case s.tok
+                    Case BoundNodeToken.BNT_EXPRSTMT
+                        evaluateExpressionStatement(s)
+                    Case BoundNodeToken.BNT_VARDECLR
+                        evaluateVariableDaclaration(s)
+                    Case BoundNodeToken.BNT_GOTOCOND
+                        cgts = s
+                        cond = EvaluatExpression(cgts.Condition)
+                        If ((cond = True And cgts.JumpWhenFalse = False) Or (cond = False And cgts.JumpWhenFalse = True)) Then
+                            index = lableToIndex(cgts.Label)
+                        End If
+                    Case BoundNodeToken.BNT_GOTO
+                        gs = s
+                        index = lableToIndex(gs.Label)
+                    Case BoundNodeToken.BNT_LABEL
+                    Case Else
+                        Throw New Exception(String.Format("unexpected token {0}", s.tok))
+                End Select
+
+                index += 1
+            End While
+        Next
+
         Return lastValue
     End Function
 End Class
