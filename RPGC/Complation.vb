@@ -1,4 +1,5 @@
 ﻿Imports System.Collections.Immutable
+Imports System.IO
 Imports System.Threading
 
 Public Class Complation
@@ -9,7 +10,6 @@ Public Class Complation
 
     Public Sub New(tree As SyntaxTree)
         syntax = tree
-        previous = Nothing
     End Sub
 
     ' ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,18 +39,39 @@ Public Class Complation
     ' ////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Function evaluate(_variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
         Dim diognos As ImmutableArray(Of Diagnostics)
+        Dim st As BoundBlockStatement
         Dim eval As Evaluator
         Dim value As Object
+        ' BoundGlobalScope globalScope = Binder.bindGlobalScope(,Syntax.ROOT);
+        ' BoundExpression boundExpr = globalScope.Expression;
 
-        diognos = syntax.getDiagnostics().Concat(globalScope_.Diagnostic).ToImmutableArray()
+        ' call property {globalScope_} to bind syntax tree
+        diognos = syntax.getDiagnostics().Concat(GlobalScope_.Diagnostic).ToImmutableArray()
 
-        If diognost.Any() Then
+        If diognos.Any() Then
             Return New EvaluationResult(diognos, Nothing)
         End If
 
-        eval = New Evaluator(_globalScope.Statement, _variables)
+        st = getStatement()
+        eval = New Evaluator(st, _variables)
         value = eval.Evaluate()
 
         Return New EvaluationResult(ImmutableArray(Of Diagnostics).Empty, value)
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////////////////
+    Private Sub emitTree(writer As TextWriter)
+        Dim stmnt As BoundStatement
+
+        stmnt = getStatement()
+        _globalScope.Statement.writeTo(writer)
+    End Sub
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////////////////
+    Private Function getStatement() As BoundBlockStatement
+        Dim stmnt As BoundStatement
+
+        stmnt = _globalScope.Statement
+        Return Lowerer.Lower(stmnt)
     End Function
 End Class
