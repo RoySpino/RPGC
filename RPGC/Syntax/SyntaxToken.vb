@@ -2,9 +2,12 @@
 Public Class SyntaxToken
     Inherits SyntaxNode
 
-    Public Property tok As TokenKind
+    Public Overrides Property kind As TokenKind
     Public Property pos As Integer
-    Public line As Integer
+    Public Property line As Integer
+    Public Property sym As Object
+
+    Public special As String
 
     Public Sub New(k As TokenKind, l As Integer, p As Integer, s As Object)
         kind = k
@@ -13,6 +16,7 @@ Public Class SyntaxToken
         sym = s
     End Sub
 
+    ' ////////////////////////////////////////////////////////
     Public Overloads ReadOnly Property Span As TextSpan
         Get
             Dim tmp As String
@@ -27,6 +31,10 @@ Public Class SyntaxToken
         End Get
     End Property
 
+    ' ////////////////////////////////////////////////////////
+    Friend Function isMissing() As Boolean
+        Return (sym Is Nothing)
+    End Function
 End Class
 
 ' //////////////////////////////////////////////////////////////////

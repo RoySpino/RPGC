@@ -94,6 +94,7 @@
     <Compile Include="Binding\BoundBinOperator.vb" />
     <Compile Include="Binding\BoundBlockStatement.vb" />
     <Compile Include="Binding\BoundCallExpression.vb" />
+    <Compile Include="Binding\BoundConversionExpression.vb" />
     <Compile Include="Binding\BoundErrorStatement.vb" />
     <Compile Include="Binding\BoundExpression.vb" />
     <Compile Include="Binding\BoundExpressionStatement.vb" />

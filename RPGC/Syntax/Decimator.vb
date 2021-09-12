@@ -10,6 +10,8 @@
     Private Shared assignmentCnt As Integer
     Private Shared onEvalLine As Boolean
     Private Shared parenCnt As Integer = 0
+    Private Shared lineType As String = ""
+    Private Shared onBooleanLine As Boolean
 
     Private Shared Function isGoodSpec(spec As String) As Boolean
 
@@ -313,7 +315,7 @@
         Dim sz, linePos, idx As Integer
 
         line = factor.symbol
-        start = factor.charPos
+        start = factor.chrPos
         linePos = factor.linePos
         sz = line.Length
         assignmentCnt = 0
@@ -424,7 +426,7 @@
 
         ' try to covert to intgeger
         If Integer.TryParse(symbol, intDummy) = False Then
-            diagnostics.reportInvalidNumber(symbol, GetType(Integer), start + symbol.Length, symbol.Length)
+            diagnostics.reportInvalidNumber(symbol, TypeSymbol.Integer_, start + symbol.Length, symbol.Length)
             kind = TokenKind.TK_BADTOKEN
         Else
             kind = TokenKind.TK_INTEGER
@@ -626,6 +628,53 @@
     End Function
 
     ' ////////////////////////////////////////////////////////////////////////////////////
+    Public Shared Function getComparisonOpCode(node As StructNode) As SyntaxToken
+        Dim op As String
+
+        op = node.symbol
+        op = op.Substring(op.Length - 2)
+
+        Select Case (op)
+            Case "EQ"
+                Return New SyntaxToken(TokenKind.TK_EQ, node.linePos, node.chrPos, node.symbol)
+            Case "NE"
+                Return New SyntaxToken(TokenKind.TK_NE, node.linePos, node.chrPos, node.symbol)
+
+            Case "LT"
+                Return New SyntaxToken(TokenKind.TK_LT, node.linePos, node.chrPos, node.symbol)
+            Case "GT"
+                Return New SyntaxToken(TokenKind.TK_GT, node.linePos, node.chrPos, node.symbol)
+
+            Case "GE"
+                Return New SyntaxToken(TokenKind.TK_GE, node.linePos, node.chrPos, node.symbol)
+            Case "LE"
+                Return New SyntaxToken(TokenKind.TK_LE, node.linePos, node.chrPos, node.symbol)
+            Case Else
+                Return New SyntaxToken(TokenKind.TK_BADTOKEN, node.linePos, node.chrPos, node.symbol)
+        End Select
+    End Function
+
+    Public Shared Function getComparisonInd(node1 As StructNode, node2 As StructNode, node3 As StructNode) As StructNode
+        Dim tmp As StructNode
+
+        ' get the first non blank symbol
+        If node1.symbol.Trim().Length > 0 Then
+            tmp = node1
+        Else
+            If node2.symbol.Trim().Length > 0 Then
+                tmp = node2
+            Else
+                tmp = node3
+            End If
+        End If
+
+        ' convert two digit indicator to standard indicator
+        tmp.symbol = $"*IN{tmp.symbol}"
+
+        Return tmp
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////
     Public Shared Function doDecimation(lineNo As Integer, line As String) As List(Of StructNode)
         Dim specificatin As String
         Dim tmp As String
@@ -662,34 +711,29 @@
     Public Shared Function cSpecRectifier(lst As List(Of StructNode), ByRef diagnostics As DiagnosticBag)
 
         Dim ret As List(Of SyntaxToken) = New List(Of SyntaxToken)()
+        Dim tToken As SyntaxToken
         Dim itmCnt As Integer
         Dim OpCode As String
-        Dim atEOF As Boolean
 
         itmCnt = lst.Count
-        onEvalLine = False
+            onEvalLine = false
+            onBooleanLine = False
 
         ' factor 1 is not empty and has no key word
         If itmCnt = 4 And lst(3).symbol.Length > 0 Then
-            ret.Add(New SyntaxToken(TokenKind.TK_BADTOKEN,
-                                    lst(itmCnt).linePos,
-                                    lst(itmCnt).charPos,
-                                    lst(3).symbol))
-            diagnostics.reportMissingFactor1(New TextSpan(lst(3).charPos,
-                                             lst(3).symbol.Length),
-                                             lst(3).linePos)
+            ret.Add(New SyntaxToken(TokenKind.TK_BADTOKEN, lst(itmCnt).linePos, lst(itmCnt).chrPos, lst(3).symbol))
+            diagnostics.reportMissingFactor1(New TextSpan(lst(3).chrPos, lst(3).symbol.Length),
+                                                 lst(3).linePos)
         End If
 
-        ' check if there is a EOF char in the string
-        atEOF = (lst(itmCnt - 1).symbol.Contains("\0") = True)
-
         ' rectify structured code to free lexicon
-        If itmCnt <= 7 Then
-            ' check if the opcode is valid
-            OpCode = lst(4).symbol
+        If itmCnt >= 6 Then
+            'check If the opcode Is valid
+            OpCode = lst(4).symbol.Trim()
+
             If SyntaxFacts.isValidOpCode(OpCode) = False Then
                 diagnostics.reportBadOpcode(OpCode, lst(4).linePos)
-                ret.Add(New SyntaxToken(TokenKind.TK_IDENTIFIER, lst(4).linePos, lst(4).charPos, OpCode))
+                ret.Add(New SyntaxToken(TokenKind.TK_IDENTIFIER, lst(4).linePos, lst(4).chrPos, OpCode))
                 Return ret
             End If
 
@@ -702,73 +746,233 @@
                     If lst(3).symbol = "" Then
                         ' +=,-=,*=,/= factor 2 to factor 3
                         ret.AddRange(doLex(lst(6)))
-                        ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).charPos, OpCode))
+                        ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).chrPos, OpCode))
                         ret.AddRange(doLex(lst(6)))
                         ret.AddRange(doLex(lst(4)))
                         ret.AddRange(doLex(lst(5)))
                     Else
-                        ' factors 1,2 And 3
+                        ' factors 1,2 and 3
                         ret.AddRange(doLex(lst(6)))
-                    ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).charPos, OpCode))
+                        ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).chrPos, OpCode))
+                        ret.AddRange(doLex(lst(3)))
+                        ret.AddRange(doLex(lst(4)))
+                        ret.AddRange(doLex(lst(5)))
+                    End If
+                Case "CALLB",
+                         "CALLP"
+                    onBooleanLine = True
+                Case "COMP"
+                    ret.AddRange(doLex(getComparisonInd(lst(9), lst(10), lst(11))))
+                    ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(4).linePos, lst(4).chrPos, "COMP"))
+                    ret.AddRange(doLex(lst(3)))
+                    ret.Add(New SyntaxToken(SyntaxFacts.getindicatorOperation(lst(9).symbol, lst(10).symbol, lst(11).symbol), lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(5)))
+                Case "CIN"
+                    'ret.AddRange(doLex(lst(6)))
+                    ret.AddRange(doLex(lst(3)))
+                    ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).chrPos, "CIN"))
+                    ret.Add(New SyntaxToken(TokenKind.TK_IDENTIFIER, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.Add(New SyntaxToken(TokenKind.TK_PARENOPEN, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.Add(New SyntaxToken(TokenKind.TK_PARENCLOSE, lst(4).linePos, lst(4).chrPos, OpCode))
+                Case "COUT",
+                         "PRINT",
+                         "DSPLY"
+                    ret.Add(New SyntaxToken(TokenKind.TK_IDENTIFIER, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.Add(New SyntaxToken(TokenKind.TK_PARENOPEN, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(3)))
+                    ret.Add(New SyntaxToken(TokenKind.TK_PARENCLOSE, lst(4).linePos, lst(4).chrPos, OpCode))
+                Case "DO"
+                    ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, OpCode))
+                Case "DOUGE",
+                         "DOUGT",
+                         "DOULE",
+                         "DOULT",
+                         "DOUEQ",
+                         "DOUNE"
+                    ret.Add(New SyntaxToken(TokenKind.TK_DOU, lst(4).linePos, lst(4).chrPos, OpCode))
                     ret.AddRange(doLex(lst(3)))
                     ret.AddRange(doLex(lst(4)))
                     ret.AddRange(doLex(lst(5)))
-                End If
-        Case "DSPLY"
-        Case "IFGE",
-                 "IFGT",
-                 "IFLE",
-                 "IFLT",
-                 "IFEQ",
-                 "IFNE"
-        ret.AddRange(doLex(lst(3)))
-        ret.AddRange(doLex(lst(4)))
-        ret.AddRange(doLex(lst(5)))
-        Case "ORGE",
+                    ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, ""))
+                    lineType = "DOU"
+                Case "DOU"
+                    onBooleanLine = True
+                    If lst(3).symbol <> "" Then
+                        ' somthing was entered in factor
+                        ret.Add(New SyntaxToken(TokenKind.TK_SPACE, lst(3).linePos, lst(3).chrPos, ""))
+                        diagnostics.reportBadFactor(New TextSpan(lst(3).chrPos, lst(3).symbol.Length), 1, lst(3).linePos)
+                    Else
+                        ret.Add(New SyntaxToken(TokenKind.TK_DOU, lst(4).linePos, lst(4).chrPos, OpCode))
+                        ret.AddRange(doLex(lst(5)))
+                        ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, ""))
+                        lineType = "DOU"
+                    End If
+                Case "DOWGE",
+                         "DOWGT",
+                         "DOWLE",
+                         "DOWLT",
+                         "DOWEQ",
+                         "DOWNE"
+                    ret.Add(New SyntaxToken(TokenKind.TK_DOW, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(3)))
+                    ret.AddRange(doLex(lst(4)))
+                    ret.AddRange(doLex(lst(5)))
+                    ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, ""))
+                    lineType = "DOW"
+                Case "DOW"
+                    onBooleanLine = True
+                    If lst(3).symbol <> "" Then
+                        ' somthing was entered in factor 1
+                        ret.Add(New SyntaxToken(TokenKind.TK_SPACE, lst(3).linePos, lst(3).chrPos, ""))
+                        diagnostics.reportBadFactor(New TextSpan(lst(3).chrPos, lst(3).symbol.Length), 1, lst(3).linePos)
+                    Else
+                        ret.Add(New SyntaxToken(TokenKind.TK_DOW, lst(4).linePos, lst(4).chrPos, OpCode))
+                        ret.AddRange(doLex(lst(5)))
+                        ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, ""))
+                        lineType = "DOW"
+                    End If
+                Case "IF"
+                    onBooleanLine = True
+                    If lst(3).symbol <> "" Then
+                        ' somthing was entered in factor
+                        ret.Add(New SyntaxToken(TokenKind.TK_SPACE, lst(3).linePos, lst(3).chrPos, ""))
+                        diagnostics.reportBadFactor(New TextSpan(lst(3).chrPos, lst(3).symbol.Length), 1, lst(3).linePos)
+                    Else
+                        ret.Add(New SyntaxToken(TokenKind.TK_IF, lst(4).linePos, lst(4).chrPos, OpCode))
+                        ret.AddRange(doLex(lst(5)))
+                        ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, ""))
+                        lineType = "IF"
+                    End If
+                Case "IFGE"
+                Case "IFGT"
+                Case "IFLE"
+                Case "IFLT"
+                Case "IFEQ"
+                Case "IFNE"
+                    ret.Add(New SyntaxToken(TokenKind.TK_IF, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(3)))
+                    ret.AddRange(doLex(lst(4)))
+                    ret.AddRange(doLex(lst(5)))
+                    ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, ""))
+                    lineType = "IF"
+                Case "ELSE"
+                    ret.Add(New SyntaxToken(TokenKind.TK_ELSE, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, ""))
+                    lineType = "ELSE"
+                Case "END"
+                    ret.Add(New SyntaxToken(TokenKind.TK_BLOCKEND, lst(4).linePos, lst(4).chrPos, OpCode))
+                    lineType = ""
+                Case "ENDDO"
+                    ret.Add(New SyntaxToken(TokenKind.TK_ENDDO, lst(4).linePos, lst(4).chrPos, OpCode))
+                    lineType = ""
+                Case "ENDIF"
+                    ret.Add(New SyntaxToken(TokenKind.TK_ENDIF, lst(4).linePos, lst(4).chrPos, OpCode))
+                    lineType = ""
+                Case "ENDFOR"
+                    ret.Add(New SyntaxToken(TokenKind.TK_ENDFOR, lst(4).linePos, lst(4).chrPos, OpCode))
+                    lineType = ""
+                Case "ENDMON"
+                    ret.Add(New SyntaxToken(TokenKind.TK_ENDMON, lst(4).linePos, lst(4).chrPos, OpCode))
+                    lineType = ""
+                Case "ENDSL"
+                    ret.Add(New SyntaxToken(TokenKind.TK_ENDSL, lst(4).linePos, lst(4).chrPos, OpCode))
+                    lineType = ""
+                Case "ENDSR"
+                    ret.Add(New SyntaxToken(TokenKind.TK_ENDSR, lst(4).linePos, lst(4).chrPos, OpCode))
+                    lineType = ""
+                Case "ORGE",
                          "ORGT",
-                 "ORLE",
-                 "ORLT",
-                 "OREQ",
-                 "ORNE"
-        Case "ANDGE",
+                         "ORLE",
+                         "ORLT",
+                         "OREQ",
+                         "ORNE"
+                    ret.Add(New SyntaxToken(TokenKind.TK_OR, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(3)))
+                    ret.Add(getComparisonOpCode(lst(4)))
+                    ret.AddRange(doLex(lst(5)))
+                Case "ANDGE",
                          "ANDGT",
                          "ANDLE",
                          "ANDLT",
                          "ANDEQ",
                          "ANDNE"
-        Case "EVAL",
-                 "EVALR"
-        onEvalLine = True
-        If lst(3).symbol <> "" Then
-            ' somthing was entered in factor
-            ret.Add(New SyntaxToken(TokenKind.TK_SPACE, lst(3).linePos, lst(3).charPos, ""))
-            diagnostics.reportBadFactor(New TextSpan(lst(3).charPos, lst(3).symbol.Length), 1, lst(3).linePos)
-
-        Else
-            ret.AddRange(doLex(lst(5)))
+                    ret.Add(New SyntaxToken(TokenKind.TK_AND, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(3)))
+                    ret.Add(getComparisonOpCode(lst(4)))
+                    ret.AddRange(doLex(lst(5)))
+                Case "EVAL"
+                Case "EVALR"
+                    onEvalLine = True
+                    If lst(3).symbol <> "" Then
+                        ' somthing was entered in factor
+                        ret.Add(New SyntaxToken(TokenKind.TK_SPACE, lst(3).linePos, lst(3).chrPos, ""))
+                        diagnostics.reportBadFactor(New TextSpan(lst(3).chrPos, lst(3).symbol.Length), 1, lst(3).linePos)
+                    Else
+                        ret.AddRange(doLex(lst(5)))
+                    End If
+                Case "FOR"
+                    onEvalLine = True
+                    If lst(3).symbol <> "" Then
+                        'somthing was entered in factor
+                        ret.Add(New SyntaxToken(TokenKind.TK_SPACE, lst(3).linePos, lst(3).chrPos, ""))
+                        diagnostics.reportBadFactor(New TextSpan(lst(3).chrPos, lst(3).symbol.Length), 1, lst(3).linePos)
+                    Else
+                        ret.AddRange(doLex(lst(4)))
+                        ret.AddRange(doLex(lst(5)))
+                        ret.Add(New SyntaxToken(TokenKind.TK_BLOCKSTART, lst(4).linePos, lst(4).chrPos, ""))
+                    End If
+                Case "MOVE"
+                    ret.AddRange(doLex(lst(6)))
+                    ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).chrPos, "MOVE"))
+                    ret.AddRange(doLex(lst(5)))
+                Case "TAG"
+                    tToken = New SyntaxToken(TokenKind.TK_TAG, lst(4).linePos, lst(3).chrPos, OpCode)
+                    tToken.special = lst(3).symbol
+                    ret.Add(tToken)
+                    ret.AddRange(doLex(lst(3)))
+                Case "GOTO"
+                    ret.Add(New SyntaxToken(TokenKind.TK_GOTO, lst(4).linePos, lst(5).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(5)))
+                Case "Z-ADD"
+                    ret.AddRange(doLex(lst(6)))
+                    ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).chrPos, OpCode))
+                    ret.Add(New SyntaxToken(TokenKind.TK_INTEGER, lst(4).linePos, lst(4).chrPos, "0"))
+                    ret.Add(New SyntaxToken(TokenKind.TK_ADD, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(5)))
+                Case "Z-SUB"
+                    ret.AddRange(doLex(lst(6)))
+                    ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).chrPos, OpCode))
+                    ret.AddRange(doLex(New StructNode(lst(4).linePos, lst(4).chrPos, "0")))
+                    ret.Add(New SyntaxToken(TokenKind.TK_SUB, lst(4).linePos, lst(4).chrPos, OpCode))
+                    ret.AddRange(doLex(lst(5)))
+            End Select
         End If
-        Case "MOVE"
-        ret.AddRange(doLex(lst(6)))
-        ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).charPos, "MOVE"))
-        ret.AddRange(doLex(lst(5)))
-        Case "Z-ADD"
-        ret.AddRange(doLex(lst(6)))
-        ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).charPos, OpCode))
-        ret.Add(New SyntaxToken(TokenKind.TK_INTEGER, lst(4).linePos, lst(4).charPos, "0"))
-        ret.Add(New SyntaxToken(TokenKind.TK_ADD, lst(4).linePos, lst(4).charPos, OpCode))
-        ret.AddRange(doLex(lst(5)))
-        Case "Z-SUB"
-        ret.AddRange(doLex(lst(6)))
-        ret.Add(New SyntaxToken(TokenKind.TK_ASSIGN, lst(6).linePos, lst(6).charPos, OpCode))
-        ret.AddRange(doLex(New StructNode(lst(4).linePos, lst(4).charPos, "0")))
-        ret.Add(New SyntaxToken(TokenKind.TK_SUB, lst(4).linePos, lst(4).charPos, OpCode))
-        ret.AddRange(doLex(lst(5)))
+
+        Return ret
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////
+    Public Shared Function dSpecRectifier(lst As List(Of StructNode), ByRef diagnostics As DiagnosticBag) As List(Of SyntaxToken)
+        Dim ret As List(Of SyntaxToken) = New List(Of SyntaxToken)()
+        Dim dclType As String
+
+        dclType = lst(3).symbol
+
+        Select Case (dclType)
+            Case "C"
+                ret.Add(New SyntaxToken(TokenKind.TK_VARDCONST, lst(0).linePos, 1, "C"))
+                ret.Add(New SyntaxToken(TokenKind.TK_IDENTIFIER, lst(0).linePos, lst(0).chrPos, lst(0).symbol))
+                ret.Add(New SyntaxToken(SyntaxFacts.getRPGType(lst(6).symbol), lst(6).linePos, lst(6).chrPos, lst(6).symbol))
+            Case "DS"
+            Case "PI"
+            Case "PR"
+            Case "S"
+            Case Else
+                ret.Add(New SyntaxToken(TokenKind.TK_VARDECLR, lst(0).linePos, 1, "S"))
+                ret.Add(New SyntaxToken(TokenKind.TK_IDENTIFIER, lst(0).linePos, lst(0).chrPos, lst(0).symbol))
+                ret.Add(New SyntaxToken(TokenKind.TK_IDENTIFIER, lst(0).linePos, lst(0).chrPos, lst(0).symbol))
+                ret.Add(New SyntaxToken(SyntaxFacts.getRPGType(lst(6).symbol), lst(6).linePos, lst(6).chrPos, lst(6).symbol))
         End Select
-        End If
-
-        If atEOF = True Then
-            ret.Add(New SyntaxToken(TokenKind.TK_EOI, lst(itmCnt - 1).linePos, lst(itmCnt - 1).charPos + lst(itmCnt - 1).symbol.Length, "_"))
-        End If
 
         Return ret
     End Function

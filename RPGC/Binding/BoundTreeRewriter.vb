@@ -5,6 +5,8 @@ Public Class BoundTreeRewriter
 
     Public Function rewriteStatement(node As BoundStatement) As BoundStatement
         Select Case node.tok
+            Case BoundNodeToken.BNT_ERROREXP
+                Return node
             Case BoundNodeToken.BNT_BLOCKSTMT
                 Return rewriteBlockStatement(node)
             Case BoundNodeToken.BNT_EXPRSTMT
@@ -33,6 +35,8 @@ Public Class BoundTreeRewriter
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Function rewriteExpression(node As BoundExpression) As BoundExpression
         Select Case node.tok
+            Case BoundNodeToken.BNT_ERROREXP
+                Return node
             Case BoundNodeToken.BNT_UINEX
                 Return rewriteUniaryExpression(node)
             Case BoundNodeToken.BNT_LITEX
@@ -43,9 +47,26 @@ Public Class BoundTreeRewriter
                 Return rewriteAssignmentExpression(node)
             Case BoundNodeToken.BNT_BINEX
                 Return rewriteBinaryExpression(node)
+            Case BoundNodeToken.BNT_CALLEXP
+                Return rewriteCallExression(node)
+            Case BoundNodeToken.BNT_CONVEXP
+                Return rewriteConversionExpression(node)
             Case Else
                 Throw New Exception($"Unexpected node{node.tok}")
         End Select
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Private Function rewriteConversionExpression(node As BoundConversionExpression) As BoundExpression
+        Dim expr As BoundExpression
+
+        expr = rewriteExpression(node._Expression)
+
+        If expr.Equals(node._Expression) Then
+            Return node
+        End If
+
+        Return New BoundConversionExpression(node.Type_, expr)
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,6 +96,19 @@ Public Class BoundTreeRewriter
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Private Function rewriteUniaryExpression(node As BoundUniExpression) As BoundExpression
+        Dim operand As BoundExpression
+
+        operand = rewriteExpression(node.right)
+
+        If operand.Equals(node.right) Then
+            Return node
+        End If
+
+        Return New BoundUniExpression(node.OP, operand)
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Private Function rewriteVariableExpression(node As BoundVariableExpression) As BoundExpression
         Return node
     End Function
@@ -85,136 +119,42 @@ Public Class BoundTreeRewriter
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Private Function rewriteUniaryExpression(node As BoundUniExpression) As BoundExpression
-        Dim operand As BoundExpression
+    Protected Overridable Function rewriteCallExression(node As BoundCallExpression)
+        Dim builder As ImmutableArray(Of BoundExpression).Builder = Nothing
+        Dim oldArgument As BoundExpression
+        Dim newArgument As BoundExpression
 
-        operand = rewriteExpression(node.right)
-        If operand.Equals(node.right) Then
+        For i As Integer = 0 To (node.args.Length - 1)
+
+            oldArgument = node.args(i)
+            newArgument = rewriteExpression(oldArgument)
+
+            If newArgument.Equals(oldArgument) = False Then
+                If builder Is Nothing Then
+                    builder = ImmutableArray.CreateBuilder(Of BoundExpression)(node.args.Length)
+
+                    For u As Integer = 0 To (i - 1)
+                        builder.Add(node.args(u))
+                    Next
+                End If
+            End If
+
+            If (builder Is Nothing) = False Then
+                builder.Add(newArgument)
+            End If
+        Next
+
+        If builder Is Nothing Then
             Return node
         End If
 
-        Return New BoundUniExpression(node.OP, operand)
+        Return New BoundCallExpression(node.function_, builder.MoveToImmutable())
     End Function
 
     ' ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ' /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////     /////
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteBoundGoToConditinalStatement(node As BoundGoToConditionalStatement) As BoundStatement
-        Dim condition As BoundExpression
-        condition = rewriteExpression(node.Condition)
 
-        If condition.Equals(node) Then
-            Return node
-        End If
-
-        Return New BoundGoToConditionalStatement(node.Label, condition, node.JumpWhenFalse)
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteBoundGoToStatement(node As BoundGoToStatement) As BoundStatement
-        Return node
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteBoundLabelStatement(node As BoundLabelStatement) As BoundStatement
-        Return node
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteBoundDoUntilStatement(node As BoundUntilStatement) As BoundStatement
-        Dim condition As BoundExpression
-        Dim body As BoundStatement
-
-        condition = rewriteExpression(node.Condition)
-        body = rewriteStatement(node.Body)
-
-        If condition.Equals(node.Condition) And body.Equals(node.Body) Then
-            Return node
-        End If
-
-        Return New BoundUntilStatement(condition, body)
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteBoundForStatement(node As BoundForStatement) As BoundStatement
-        Dim lowerBound As BoundExpression
-        Dim uperBound As BoundExpression
-        Dim body As BoundStatement
-
-        lowerBound = rewriteExpression(node.LBound)
-        uperBound = rewriteExpression(node.Ubound)
-        body = rewriteStatement(node.Body)
-
-        If lowerBound.Equals(node.LBound) And uperBound.Equals(node.Ubound) And body.Equals(node.Body) Then
-            Return node
-        End If
-
-        Return New BoundForStatement(node.Variable, lowerBound, uperBound, body, node.IsCountUP)
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteBoundWhileStatement(node As BoundWhileStatement) As BoundStatement
-        Dim condition As BoundExpression
-        Dim body As BoundStatement
-
-        condition = rewriteExpression(node.Condition)
-        body = rewriteStatement(node.Body)
-
-        If condition.Equals(node.Condition) And body.Equals(node.Body) Then
-            Return node
-        End If
-
-        Return New BoundWhileStatement(condition, body)
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteIfStatement(node As BoundIfStatement) As BoundStatement
-        Dim condition As BoundExpression
-        Dim trueStatementBody As BoundStatement
-        Dim elseStaetmentBody As BoundStatement
-
-        condition = rewriteExpression(node.Condition)
-        trueStatementBody = rewriteStatement(node.ThenStatement)
-        elseStaetmentBody = Nothing
-
-        If node.ElseStatement Is Nothing Then
-            elseStaetmentBody = rewriteStatement(node.ElseStatement)
-        End If
-
-        If condition.Equals(node.Condition) And trueStatementBody.Equals(node.ThenStatement) And elseStaetmentBody.Equals(node.ElseStatement) Then
-            Return node
-        End If
-
-        Return New BoundIfStatement(condition, trueStatementBody, elseStaetmentBody)
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteVariableDeclaration(node As BoundVariableDeclaration) As BoundStatement
-        Dim initilizer As BoundExpression
-
-        initilizer = rewriteExpression(node.Initalizer)
-
-        If initilizer.Equals(node.Initalizer) Then
-            Return node
-        End If
-
-        Return New BoundVariableDeclaration(node.Variable, initilizer)
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Public Overridable Function rewriteExpressionStatement(node As BoundExpressionStatement) As BoundStatement
-        Dim expression As BoundExpression
-
-        expression = rewriteExpression(node.Expression)
-
-        If expression.Equals(node.Expression) Then
-            Return node
-        End If
-
-        Return New BoundExpressionStatement(expression)
-    End Function
-
-    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Public Overridable Function rewriteBlockStatement(node As BoundBlockStatement) As BoundStatement
         Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
         Dim oldStatement As BoundStatement
@@ -247,34 +187,124 @@ Public Class BoundTreeRewriter
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Protected Overridable Function rewriteCallExression(node As BoundCallExpression)
-        Dim builder As ImmutableArray(Of BoundExpression).Builder = Nothing
-        Dim oldArgument As BoundExpression
-        Dim newArgument As BoundExpression
+    Public Overridable Function rewriteExpressionStatement(node As BoundExpressionStatement) As BoundStatement
+        Dim expression As BoundExpression
 
-        For i As Integer = 0 To (node.args.Length - 1)
+        expression = rewriteExpression(node.Expression)
 
-            oldArgument = node.args(i)
-            newArgument = rewriteExpression(oldArgument)
+        If expression.Equals(node.Expression) = False Then
+            Return node
+        End If
 
-            If newArgument <> oldArgument Then
-                If builder Is Nothing Then
-                    builder = ImmutableArray.CreateBuilder < BoundExpression > (node.args.Length)
+        Return New BoundExpressionStatement(expression)
+    End Function
 
-                    For u As Integer = 0 To (i - 1)
-                        builder.Add(node.args[u])
-                    End If
-            End If
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Overridable Function rewriteVariableDeclaration(node As BoundVariableDeclaration) As BoundStatement
+        Dim initilizer As BoundExpression
 
-            If (builder Is Nothing) = False Then
-                builder.Add(newArgument)
-            End If
-        Next
+        initilizer = rewriteExpression(node.Initalizer)
 
-                        If builder Is Nothing Then
-                        Return node
-                    End If
+        If initilizer.Equals(node.Initalizer) Then
+            Return node
+        End If
 
-                    Return New BoundCallExpression(node.funciton, builder.MoveToImmutable())
-        End Function
+        Return New BoundVariableDeclaration(node.Variable, initilizer)
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Overridable Function rewriteIfStatement(node As BoundIfStatement) As BoundStatement
+        Dim condition As BoundExpression
+        Dim trueStatementBody As BoundStatement
+        Dim elseStaetmentBody As BoundStatement
+
+        condition = rewriteExpression(node.Condition)
+        trueStatementBody = rewriteStatement(node.ThenStatement)
+        elseStaetmentBody = Nothing
+
+        If (node.ElseStatement Is Nothing) = False Then
+            elseStaetmentBody = rewriteStatement(node.ElseStatement)
+        Else
+            elseStaetmentBody = Nothing
+        End If
+
+        If condition.Equals(node.Condition) And trueStatementBody.Equals(node.ThenStatement) And elseStaetmentBody.Equals(node.ElseStatement) Then
+            Return node
+        End If
+
+        Return New BoundIfStatement(condition, trueStatementBody, elseStaetmentBody)
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Overridable Function rewriteBoundWhileStatement(node As BoundWhileStatement) As BoundStatement
+        Dim condition As BoundExpression
+        Dim body As BoundStatement
+
+        condition = rewriteExpression(node.Condition)
+        body = rewriteStatement(node.Body)
+
+        If condition.Equals(node.Condition) And body.Equals(node.Body) Then
+            Return node
+        End If
+
+        Return New BoundWhileStatement(condition, body)
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Overridable Function rewriteBoundForStatement(node As BoundForStatement) As BoundStatement
+        Dim lowerBound As BoundExpression
+        Dim uperBound As BoundExpression
+        Dim body As BoundStatement
+
+        lowerBound = rewriteExpression(node.LBound)
+        uperBound = rewriteExpression(node.Ubound)
+        body = rewriteStatement(node.Body)
+
+        If lowerBound.Equals(node.LBound) And uperBound.Equals(node.Ubound) And body.Equals(node.Body) Then
+            Return node
+        End If
+
+        Return New BoundForStatement(node.Variable, lowerBound, uperBound, body, node.IsCountUP)
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Overridable Function rewriteBoundDoUntilStatement(node As BoundUntilStatement) As BoundStatement
+        Dim condition As BoundExpression
+        Dim body As BoundStatement
+
+        condition = rewriteExpression(node.Condition)
+        body = rewriteStatement(node.Body)
+
+        If condition.Equals(node.Condition) And body.Equals(node.Body) Then
+            Return node
+        End If
+
+        Return New BoundUntilStatement(condition, body)
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Overridable Function rewriteBoundGoToConditinalStatement(node As BoundGoToConditionalStatement) As BoundStatement
+        Dim condition As BoundExpression
+
+        condition = rewriteExpression(node.Condition)
+
+        If condition.Equals(node) Then
+            Return node
+        End If
+
+        Return New BoundGoToConditionalStatement(node.Label, condition, node.JumpWhenFalse)
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Overridable Function rewriteBoundGoToStatement(node As BoundGoToStatement) As BoundStatement
+        Return node
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Public Overridable Function rewriteBoundLabelStatement(node As BoundLabelStatement) As BoundStatement
+        Return node
+    End Function
+
+
+
 End Class

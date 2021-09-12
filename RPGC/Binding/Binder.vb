@@ -406,6 +406,7 @@ Public Enum BoundNodeToken
     BNT_GOTO
     BNT_CALLEXP
     BNT_ERROREXP
+    BNT_CONVEXP
 End Enum
 Public Enum BoundUniOpToken
     BUO_IDENTITY
