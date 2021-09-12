@@ -13,7 +13,7 @@
     End Sub
 
     ' /////////////////////////////////////////////////////////////////////////////////
-    Public Function resultType() As Type
+    Public Function resultType() As TypeSymbol
         Return OP.resultType
     End Function
 End Class

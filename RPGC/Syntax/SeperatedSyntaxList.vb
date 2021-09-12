@@ -3,9 +3,10 @@ Imports System.Collections.Generic
 Imports System.Collections.Immutable
 
 
-Public Class SeperatedSyntaxList(Of T As SyntaxNode)
+Public NotInheritable Class SeperatedSyntaxList(Of T As SyntaxNode)
     Inherits SeperatedSyntaxList_
-    Implements IEnumerable(Of SyntaxNode)
+    Interface IEnumerable(Of SyntaxNode)
+    End Interface
 
     Private ReadOnly SeperatorsAndNodes As ImmutableArray(Of SyntaxNode)
 
@@ -52,7 +53,7 @@ Public Class SeperatedSyntaxList(Of T As SyntaxNode)
     End Function
 
     ' ///////////////////////////////////////////////////////////////////
-    Public Iterator Function GetEnumerator() As IEnumerator(Of SyntaxNode) Implements IEnumerable(Of SyntaxNode).GetEnumerator
+    Public Iterator Function GetEnumerator() As IEnumerator(Of SyntaxNode) Implements IEnumerable(Of T).GetEnumerator
         Dim cnt As Integer = Count()
 
         For i As Integer = 0 To (cnt - 1)

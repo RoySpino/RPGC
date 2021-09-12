@@ -9,7 +9,7 @@
     Public Property Body As BoundStatement
     Public Property IsCountUP As Boolean
 
-    Public Sub New(_variable As VariableSymbol, _lBound As BoundExpression, _ubound As BoundExpression, _body As BoundStatement, _isCountUp As bool, Optional _incrementBy As BoundExpression = Nothing)
+    Public Sub New(_variable As VariableSymbol, _lBound As BoundExpression, _ubound As BoundExpression, _body As BoundStatement, _isCountUp As Boolean, Optional _incrementBy As BoundExpression = Nothing)
         Variable = _variable
         LBound = _lBound
         Ubound = _ubound

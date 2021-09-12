@@ -12,19 +12,32 @@ Public Class SyntaxNode
     Public Iterator Function getCildren() As IEnumerable(Of SyntaxNode)
         Dim properties() As PropertyInfo
         Dim children As IEnumerable(Of SyntaxNode) = Nothing
+        Dim chd As SyntaxNode
+        Dim lst As SeperatedSyntaxList
 
         properties = Me.GetType().GetProperties(BindingFlags.Public Or BindingFlags.Instance)
 
         For Each prop As PropertyInfo In properties
-            If (GetType(SyntaxNode).IsAssignableFrom(prop.PropertyType)) Then
-                Yield prop.GetValue(Me)
+            If GetType(SyntaxNode).IsAssignableFrom(prop.PropertyType) Then
+                chd = prop.GetValue(Me)
+                If chd Is Nothing = False Then
+                    Yield prop.GetValue(Me)
+                End If
             Else
-                If (GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(prop.PropertyType)) Then
+                If (GetType(SeperatedSyntaxList).IsAssignableFrom(prop.PropertyType)) Then
+                    lst = prop.GetValue(Me)
 
-                    children = prop.GetValue(Me)
-                    For Each child As SyntaxNode In children
-                        Yield child
+                    For Each arg As SyntaxNode In lst.getWithSeperators()
+                        Yield arg
                     Next
+                Else
+                    If (GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(prop.PropertyType)) Then
+
+                        children = prop.GetValue(Me)
+                        For Each child As SyntaxNode In children
+                            Yield child
+                        Next
+                    End If
                 End If
             End If
         Next

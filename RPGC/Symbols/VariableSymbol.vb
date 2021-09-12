@@ -4,7 +4,6 @@
     Public Property Type_ As TypeSymbol
     Public Property IsReadonly_ As Boolean
 
-
     Public Sub New(name As String, isReadOnly As Boolean, _type As TypeSymbol)
         MyBase.New(name)
 

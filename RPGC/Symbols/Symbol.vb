@@ -1,6 +1,6 @@
-﻿Public Class Symbol
+﻿Public MustInherit Class Symbol
     Property Name As String
-    MustOverride Property Kind As SymbolKind
+    Public Overridable Property Kind As SymbolKind
 
     Public Sub New(nam As String)
         Name = nam
