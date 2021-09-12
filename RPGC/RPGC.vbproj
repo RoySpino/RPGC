@@ -93,6 +93,8 @@
     <Compile Include="Binding\BoundBinExpression.vb" />
     <Compile Include="Binding\BoundBinOperator.vb" />
     <Compile Include="Binding\BoundBlockStatement.vb" />
+    <Compile Include="Binding\BoundCallExpression.vb" />
+    <Compile Include="Binding\BoundErrorStatement.vb" />
     <Compile Include="Binding\BoundExpression.vb" />
     <Compile Include="Binding\BoundExpressionStatement.vb" />
     <Compile Include="Binding\BoundForStatement.vb" />
@@ -112,8 +114,22 @@
     <Compile Include="Binding\BoundVariableExpression.vb" />
     <Compile Include="Binding\BoundIfStatement.vb" />
     <Compile Include="Binding\BoundWhileStatement.vb" />
+    <Compile Include="Binding\BindUntilStatement.vb" />
+    <Compile Include="Binding\Conversion.vb" />
+    <Compile Include="Syntax\CallExpressionSyntax.vb" />
+    <Compile Include="Syntax\ForStatementSyntax.vb" />
+    <Compile Include="Syntax\GoToStatementSyntax.vb" />
+    <Compile Include="Syntax\SeperatedSyntaxList.vb" />
+    <Compile Include="Syntax\TagStatementSyntax.vb" />
+    <Compile Include="Syntax\UntilStatementSyntax.vb" />
     <Compile Include="LabelSymbol.vb" />
     <Compile Include="Lowering\Lowerer.vb" />
+    <Compile Include="Symbols\BuiltinFunctions.vb" />
+    <Compile Include="Symbols\FunctionSymbol.vb" />
+    <Compile Include="Symbols\ParamiterSymbol.vb" />
+    <Compile Include="Symbols\Symbol.vb" />
+    <Compile Include="Symbols\TypeSymbol.vb" />
+    <Compile Include="Symbols\VariableSymbol.vb" />
     <Compile Include="Syntax\ElseStatementSyntax.vb" />
     <Compile Include="Syntax\IfStatementSyntax.vb" />
     <Compile Include="Syntax\UinaryExpressionSyntax.vb" />
@@ -158,10 +174,10 @@
     <Compile Include="Syntax\SyntaxTree.vb" />
     <Compile Include="Syntax\UniaryExpressionSyntax.vb" />
     <Compile Include="Syntax\VariableDeclarationSyntax.vb" />
+    <Compile Include="Syntax\WhileStatementSyntax.vb" />
     <Compile Include="Text\SourceText.vb" />
     <Compile Include="Text\TextLine.vb" />
     <Compile Include="Text\TextSpan.vb" />
-    <Compile Include="VariableSymbol.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">

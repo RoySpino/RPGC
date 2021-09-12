@@ -245,4 +245,36 @@ Public Class BoundTreeRewriter
 
         Return New BoundBlockStatement(builder.MoveToImmutable())
     End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Protected Overridable Function rewriteCallExression(node As BoundCallExpression)
+        Dim builder As ImmutableArray(Of BoundExpression).Builder = Nothing
+        Dim oldArgument As BoundExpression
+        Dim newArgument As BoundExpression
+
+        For i As Integer = 0 To (node.args.Length - 1)
+
+            oldArgument = node.args(i)
+            newArgument = rewriteExpression(oldArgument)
+
+            If newArgument <> oldArgument Then
+                If builder Is Nothing Then
+                    builder = ImmutableArray.CreateBuilder < BoundExpression > (node.args.Length)
+
+                    For u As Integer = 0 To (i - 1)
+                        builder.Add(node.args[u])
+                    End If
+            End If
+
+            If (builder Is Nothing) = False Then
+                builder.Add(newArgument)
+            End If
+        Next
+
+                        If builder Is Nothing Then
+                        Return node
+                    End If
+
+                    Return New BoundCallExpression(node.funciton, builder.MoveToImmutable())
+        End Function
 End Class

@@ -20,10 +20,10 @@ Public Class DiagnosticBag
     End Sub
 
     ' ////////////////////////////////////////////////////////////////////////
-    Public Sub reportInvalidNumber(symbol As String, typVal As Type, str As Integer, len As Integer)
+    Public Sub reportInvalidNumber(symbol As String, typVal As TypeSymbol, str As Integer, len As Integer)
         Dim msg As String
 
-        msg = String.Format("rpgc: the symbol {0} is not a valid {1}", symbol, typVal)
+        msg = String.Format("rpgc: the symbol {0} is not a valid {1}", symbol, typVal.Name)
         report(msg, str, len)
     End Sub
 
@@ -44,24 +44,24 @@ Public Class DiagnosticBag
         report(span, message)
     End Sub
 
-    Friend Sub reportCannotConvert(span As TextSpan, type As Object, expectedResult As Type)
+    Friend Sub reportCannotConvert(span As TextSpan, type As Object, expectedResult As TypeSymbol)
         Throw New NotImplementedException()
     End Sub
 
     ' //////////////////////////////////////////////////////////////////////////
-    Public Sub reportUndefinedUniaryOp(span As TextSpan, opSym As String, opType As Type)
+    Public Sub reportUndefinedUniaryOp(span As TextSpan, opSym As String, opType As TypeSymbol)
         Dim message As String
 
-        message = String.Format("rpgc:({2}): uninary operator [{0}] is not defined for type {1}", opSym, opType, "{0},{1}")
+        message = String.Format("rpgc:({2}): uninary operator [{0}] is not defined for type {1}", opSym, opType.Name, "{0},{1}")
 
         report(span, message)
     End Sub
 
     ' //////////////////////////////////////////////////////////////////////////
-    Public Sub reportUndefinedBynaryOp(span As TextSpan, opSym As String, LeftType As Type, RightType As Type)
+    Public Sub reportUndefinedBynaryOp(span As TextSpan, opSym As String, LeftType As TypeSymbol, RightType As TypeSymbol)
         Dim message As String
 
-        message = String.Format("rpgc:({3}): binnary operator [{0}] is not defined for types {1} and {2}", opSym, LeftType, RightType, "{0},{1}")
+        message = String.Format("rpgc:({3}): binnary operator [{0}] is not defined for types {1} and {2}", opSym, LeftType.Name, RightType.Name, "{0},{1}")
 
         report(span, message)
     End Sub
@@ -148,10 +148,10 @@ Public Class DiagnosticBag
     End Sub
 
     ' //////////////////////////////////////////////////////////////////////////
-    Friend Sub reportCannotConvertType(span As TextSpan, name As String, typeA As Type, typeB As Type)
+    Friend Sub reportCannotConvertType(span As TextSpan, name As String, typeA As TypeSymbol, typeB As TypeSymbol)
         Dim message As String
 
-        message = String.Format("rpgc: can not convert variable [{0}] from {1} to {2}", name, typeA, typeB)
+        message = String.Format("rpgc: can not convert variable [{0}] from {1} to {2}", name, typeA.Name, typeB.Name)
 
         report(span, message)
     End Sub
@@ -191,5 +191,9 @@ Public Class DiagnosticBag
     ' //////////////////////////////////////////////////////////////////////////
     Public Sub Clear()
         _diagnostic.Clear()
+    End Sub
+
+    Friend Sub reportLoopWithoutCondition(span As TextSpan, v As String)
+        Throw New NotImplementedException()
     End Sub
 End Class

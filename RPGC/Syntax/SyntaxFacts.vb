@@ -3,6 +3,45 @@ Public Class SyntaxFacts
     Public Shared badChars_Var() As Char = {".", "\", ",", "<", ">", "?", "", ":", """", "'", "[", "]", "{", "}", "+", "*", "-", "=", "(", ")", "^", "!", "`", "~"}
     Public Shared badChars_ToStartVar() As Char = {"_", "&", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
+
+
+    'Public Static Char[] badChars_Var = { '.', '\\', ',', '<', '>', '?', '', ':', '"', '\'', '[', ']', '{', '}', '+', '*', '-', '=', '(', ')', '^', '!', '`', '~' }
+    'Public Static Char[] badChars_ToStartVar = { '_', '&', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }
+    Private Shared struckeyWords() As String = {
+                                "ACQ", "ADD", "ADDDUR", "ALLOC", "ANDEQ", "ANDGE", "ANDGT", "ANDLE", "ANDLT", "ANDNE", "ASSIGN", "BEGSR",
+                                "CAB", "CALL", "CALLB", "CALLP", "CAS", "CAT", "CHAIN", "CHECK", "CHECKR", "CIN", "CLEAR", "CLOSE", "COLON",
+                                "COMMIT", "COMP", "COUT", "DATE", "DEALLOC", "DEFINE", "DELETE", "DIV", "DO", "DOU", "DOUEQ", "DOUGE",
+                                "DOUGT", "DOULE", "DOULT", "DOUNE", "DOW", "DOWEQ", "DOWGE", "DOWGT", "DOWLE", "DOWLT", "DOWNE", "DSPLY",
+                                "DUMP", "ELSE", "END", "ENDCS", "ENDDO", "ENDFOR", "ENDIF", "ENDMON", "ENDSL", "ENDSR", "EVAL", "EVALR",
+                                "EXCEPT", "EXFMT", "EXSR", "EXTRCT", "FEOD", "FOR", "FORCE", "GOTO", "IF", "IFEQ", "IFGE", "IFGT", "IFLE",
+                                "IFLT", "IFNE", "IN", "ITER", "KFLD", "KLIST", "LEAVE", "LEAVESR", "LITEXPR", "LOOKUP", "MHHZO", "MHLZO",
+                                "MLHZO", "MLLZO", "MONITOR", "MOVE", "MOVEA", "MOVEL", "MULT", "MVR", "NEXT", "NONE", "NOT", "OCCUR", "OPEN",
+                                "OREQ", "ORGE", "ORGT", "ORLE", "ORLT", "ORNE", "OTHER", "OUT", "PARM", "PLIST", "POST", "PRINT", "READ",
+                                "READC", "READE", "READP", "READPE", "REALLOC", "REL", "RESET", "RETURN", "ROLBK", "SCAN", "SELECT", "SEMI",
+                                "SETGT", "SETLL", "SETOFF", "SETON", "SHTDN", "SORTA", "SPACE", "SQRT", "SUB", "SUBDUR", "SUBST", "TAG", "TEST",
+                                "TESTB", "TESTN", "TESTZ", "TIME", "UNIEXP", "UNIOP", "UNLOCK", "UPDATE", "WHEN", "WRITE", "XFOOT", "XLATE",
+                                "Z-ADD", "Z-SUB"}
+    Private Shared freeKeyWords() As String = {"ACQ", "ADDDUR", "ALLOC", "AND", "ASSIGN", "BEGSR",
+                                "CIN", "CHAIN", "CLEAR",
+                                "CLOSE", "COMMIT", "COUT", "DCL-C", "DCL-S", "DEALLOC", "DEFINE", "DELETE",
+                                "DOU", "DOW", "DSPLY", "DUMP", "ELSE", "END", "ENDCS", "ENDDO", "ENDFOR",
+                                "ENDIF", "ENDMON", "ENDSL", "ENDSR", "EXCEPT", "EXFMT", "EXSR",
+                                "EXTRCT", "FEOD", "FOR", "FORCE", "IF", "IN", "ITER", "LEAVE",
+                                "LEAVESR", "LITEXPR", "MHHZO", "MONITOR",
+                                "MULT", "NOT", "OCCUR", "OPEN", "OR",
+                                "OTHER", "OUT", "POST", "PRINT", "READ", "READC",
+                                "READE", "READP", "READPE", "REALLOC", "REL", "RESET", "RETURN", "ROLBK", "SCAN",
+                                "SELECT", "SEMI", "SETGT", "SETLL", "SHTDN", "SORTA",
+                                "SUBDUR", "SUBST",
+                                "UNIEXP", "UNIOP", "UNLOCK", "UPDATE", "WHEN", "WRITE"}
+    Private Shared freeBIFWithNoParan() As String = {"DSPLY", "SORTA", "CIN", "COUT", "READ", "READE", "SETLL", "SETGT", "OPEN", "CLOSE", "READC", "DELETE", "WRITE", "UPDATE"}
+    Private Shared BIIndicators() As String = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
+                                               "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60",
+                                               "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90",
+                                               "91", "92", "93", "94", "95", "96", "97", "98", "99", "LR", "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "KA", "KB", "KC", "KD", "KE", "KF", "KG", "KH", "KI", "KJ", "KK",
+                                               "KL", "KM", "KN", "KO", "KP", "KQ", "KR", "KS", "KT", "KU", "KV", "KW", "KX", "L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "M1", "M2", "M3", "M4", "M5", "M6", "M7",
+                                               "M8", "M9", "MR", "OA", "OG", "OV", "RT"}
+
     ' extention method 
     ' useage: tokenKind.TK_ADD.getBinaryOporatorPrecedence()
     Public Shared Function getBinaryOporatorPrecedence(tok As TokenKind) As Integer
@@ -228,267 +267,15 @@ Public Class SyntaxFacts
 
         ' check boolean values
         If isStartsWith_IN = True And is5CharsLong = True Then
-            num = symbol.Substring(3)
+            num = (From ind In BIIndicators
+                   Where ($"*IN{ind}".Equals(symbol) = True)).FirstOrDefault()
 
-            Select Case (num)
-                Case "LR"
-                    Return TokenKind.TK_INLR
-                Case "L1"
-                    Return TokenKind.TK_INL1
-                Case "L2"
-                    Return TokenKind.TK_INL2
-                Case "L3"
-                    Return TokenKind.TK_INL3
-                Case "L4"
-                    Return TokenKind.TK_INL4
-                Case "L5"
-                    Return TokenKind.TK_INL5
-                Case "L6"
-                    Return TokenKind.TK_INL6
-                Case "L7"
-                    Return TokenKind.TK_INL7
-                Case "L8"
-                    Return TokenKind.TK_INL8
-                Case "L9"
-                    Return TokenKind.TK_INL9
-                Case "M1"
-                    Return TokenKind.TK_INM1
-                Case "M2"
-                    Return TokenKind.TK_INM2
-                Case "M3"
-                    Return TokenKind.TK_INM3
-                Case "M4"
-                    Return TokenKind.TK_INM4
-                Case "M5"
-                    Return TokenKind.TK_INM5
-                Case "M6"
-                    Return TokenKind.TK_INM6
-                Case "M7"
-                    Return TokenKind.TK_INM7
-                Case "M8"
-                    Return TokenKind.TK_INM8
-                Case "M9"
-                    Return TokenKind.TK_INM9
-                Case "OA"
-                    Return TokenKind.TK_INOA
-                Case "OG"
-                    Return TokenKind.TK_INOG
-                Case "OV"
-                    Return TokenKind.TK_INOV
-                Case "RT"
-                    Return TokenKind.TK_INRT
-
-                Case "01"
-                    Return TokenKind.TK_IN01
-                Case "02"
-                    Return TokenKind.TK_IN02
-                Case "03"
-                    Return TokenKind.TK_IN03
-                Case "04"
-                    Return TokenKind.TK_IN04
-                Case "05"
-                    Return TokenKind.TK_IN05
-                Case "06"
-                    Return TokenKind.TK_IN06
-                Case "07"
-                    Return TokenKind.TK_IN07
-                Case "08"
-                    Return TokenKind.TK_IN08
-                Case "09"
-                    Return TokenKind.TK_IN09
-                Case "10"
-                    Return TokenKind.TK_IN10
-
-                Case "11"
-                    Return TokenKind.TK_IN11
-                Case "12"
-                    Return TokenKind.TK_IN12
-                Case "13"
-                    Return TokenKind.TK_IN13
-                Case "14"
-                    Return TokenKind.TK_IN14
-                Case "15"
-                    Return TokenKind.TK_IN15
-                Case "16"
-                    Return TokenKind.TK_IN16
-                Case "17"
-                    Return TokenKind.TK_IN17
-                Case "18"
-                    Return TokenKind.TK_IN18
-                Case "19"
-                    Return TokenKind.TK_IN19
-                Case "20"
-                    Return TokenKind.TK_IN20
-
-                Case "21"
-                    Return TokenKind.TK_IN21
-                Case "22"
-                    Return TokenKind.TK_IN22
-                Case "23"
-                    Return TokenKind.TK_IN23
-                Case "24"
-                    Return TokenKind.TK_IN24
-                Case "25"
-                    Return TokenKind.TK_IN25
-                Case "26"
-                    Return TokenKind.TK_IN26
-                Case "27"
-                    Return TokenKind.TK_IN27
-                Case "28"
-                    Return TokenKind.TK_IN28
-                Case "29"
-                    Return TokenKind.TK_IN29
-                Case "30"
-                    Return TokenKind.TK_IN30
-
-                Case "31"
-                    Return TokenKind.TK_IN31
-                Case "32"
-                    Return TokenKind.TK_IN32
-                Case "33"
-                    Return TokenKind.TK_IN33
-                Case "34"
-                    Return TokenKind.TK_IN34
-                Case "35"
-                    Return TokenKind.TK_IN35
-                Case "36"
-                    Return TokenKind.TK_IN36
-                Case "37"
-                    Return TokenKind.TK_IN37
-                Case "38"
-                    Return TokenKind.TK_IN38
-                Case "39"
-                    Return TokenKind.TK_IN39
-                Case "40"
-                    Return TokenKind.TK_IN40
-
-                Case "41"
-                    Return TokenKind.TK_IN41
-                Case "42"
-                    Return TokenKind.TK_IN42
-                Case "43"
-                    Return TokenKind.TK_IN43
-                Case "44"
-                    Return TokenKind.TK_IN44
-                Case "45"
-                    Return TokenKind.TK_IN45
-                Case "46"
-                    Return TokenKind.TK_IN46
-                Case "47"
-                    Return TokenKind.TK_IN47
-                Case "48"
-                    Return TokenKind.TK_IN48
-                Case "49"
-                    Return TokenKind.TK_IN49
-                Case "50"
-                    Return TokenKind.TK_IN50
-
-                Case "51"
-                    Return TokenKind.TK_IN51
-                Case "52"
-                    Return TokenKind.TK_IN52
-                Case "53"
-                    Return TokenKind.TK_IN53
-                Case "54"
-                    Return TokenKind.TK_IN54
-                Case "55"
-                    Return TokenKind.TK_IN55
-                Case "56"
-                    Return TokenKind.TK_IN56
-                Case "57"
-                    Return TokenKind.TK_IN57
-                Case "58"
-                    Return TokenKind.TK_IN58
-                Case "59"
-                    Return TokenKind.TK_IN59
-                Case "60"
-                    Return TokenKind.TK_IN60
-
-                Case "61"
-                    Return TokenKind.TK_IN61
-                Case "62"
-                    Return TokenKind.TK_IN62
-                Case "63"
-                    Return TokenKind.TK_IN63
-                Case "64"
-                    Return TokenKind.TK_IN64
-                Case "65"
-                    Return TokenKind.TK_IN65
-                Case "66"
-                    Return TokenKind.TK_IN66
-                Case "67"
-                    Return TokenKind.TK_IN67
-                Case "68"
-                    Return TokenKind.TK_IN68
-                Case "69"
-                    Return TokenKind.TK_IN69
-                Case "70"
-                    Return TokenKind.TK_IN70
-
-                Case "71"
-                    Return TokenKind.TK_IN71
-                Case "72"
-                    Return TokenKind.TK_IN72
-                Case "73"
-                    Return TokenKind.TK_IN73
-                Case "74"
-                    Return TokenKind.TK_IN74
-                Case "75"
-                    Return TokenKind.TK_IN75
-                Case "76"
-                    Return TokenKind.TK_IN76
-                Case "77"
-                    Return TokenKind.TK_IN77
-                Case "78"
-                    Return TokenKind.TK_IN78
-                Case "79"
-                    Return TokenKind.TK_IN89
-                Case "80"
-                    Return TokenKind.TK_IN30
-
-                Case "81"
-                    Return TokenKind.TK_IN81
-                Case "82"
-                    Return TokenKind.TK_IN82
-                Case "83"
-                    Return TokenKind.TK_IN83
-                Case "84"
-                    Return TokenKind.TK_IN84
-                Case "85"
-                    Return TokenKind.TK_IN85
-                Case "86"
-                    Return TokenKind.TK_IN86
-                Case "87"
-                    Return TokenKind.TK_IN87
-                Case "88"
-                    Return TokenKind.TK_IN88
-                Case "89"
-                    Return TokenKind.TK_IN89
-                Case "90"
-                    Return TokenKind.TK_IN90
-
-                Case "91"
-                    Return TokenKind.TK_IN91
-                Case "92"
-                    Return TokenKind.TK_IN92
-                Case "93"
-                    Return TokenKind.TK_IN93
-                Case "94"
-                    Return TokenKind.TK_IN94
-                Case "95"
-                    Return TokenKind.TK_IN95
-                Case "96"
-                    Return TokenKind.TK_IN96
-                Case "97"
-                    Return TokenKind.TK_IN97
-                Case "98"
-                    Return TokenKind.TK_IN98
-                Case "99"
-                    Return TokenKind.TK_IN99
-
-                Case Else
-                    Return TokenKind.TK_BADTOKEN
-            End Select
+            ' check if indicator was found in the list
+            If (num Is Nothing) = False Then
+                Return TokenKind.TK_IDENTIFIER
+            Else
+                Return TokenKind.TK_BADTOKEN
+            End If
         Else
             Select Case (symbol)
                 Case "*ON"
@@ -503,98 +290,25 @@ Public Class SyntaxFacts
 
     ' //////////////////////////////////////////////////////////////////////////////////
     Public Shared Function isKeyword(kw As String) As Boolean
-        Dim max, mid, min, diff As Integer
-        Dim keyWords() As String = {"ACQ", "ADDDUR", "ALLOC", "AND", "ASSIGN", "BEGSR",
-                                    "CHAIN", "CLEAR",
-                                    "CLOSE", "COMMIT", "DEALLOC", "DEFINE", "DELETE",
-                                    "DOU", "DOW", "DSPLY", "DUMP", "ELSE", "END", "ENDCS", "ENDDO", "ENDFOR",
-                                    "ENDIF", "ENDMON", "ENDSL", "ENDSR", "EXCEPT", "EXFMT", "EXSR",
-                                    "EXTRCT", "FEOD", "FOR", "FORCE", "IF", "IN", "ITER", "LEAVE",
-                                    "LEAVESR", "LITEXPR", "MHHZO", "MONITOR",
-                                    "MULT", "NOT", "OCCUR", "OPEN", "OR",
-                                    "OTHER", "OUT", "POST", "READ", "READC",
-                                    "READE", "READP", "READPE", "REALLOC", "REL", "RESET", "RETURN", "ROLBK", "SCAN",
-                                    "SELECT", "SEMI", "SETGT", "SETLL", "SHTDN", "SORTA",
-                                    "SUBDUR", "SUBST",
-                                    "UNIEXP", "UNIOP", "UNLOCK", "UPDATE", "WHEN", "WRITE"}
+        Dim symbol As String
 
-        max = keyWords.Length
-        min = 0
-        mid = max >> 1
+        ' find the symbol in the list
+        symbol = (From nt In freeBIFWithNoParan
+                  Where (nt = kw)).FirstOrDefault()
 
-        While True
-            ' check symbol
-            If keyWords(mid) = kw Then
-                Return True
-            End If
-
-            ' set New range
-            If String.Compare(keyWords(mid), kw) < 0 Then
-                min = mid
-            Else
-                max = mid
-            End If
-
-            ' compute next symbol
-            diff = (max - min)
-            mid = diff >> 1
-            mid += min
-
-            ' exit symbol Not found
-            If diff = 0 Then
-                Return False
-            End If
-        End While
-
-        Return False
+        Return (symbol Is Nothing) = False
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////
     Public Shared Function isValidOpCode(kw As String) As Boolean
-        Dim max, mid, min, diff As Integer
-        Dim keyWords() As String = {"ACQ", "ADD", "ADDDUR", "ALLOC", "ANDGE", "ANDGT", "ANDLE", "ANDLT", "ASSIGN", "BEGSR",
-                                    "CAB", "CALL", "CALLB", "CALLP", "CAS", "CAT", "CHAIN", "CHECK", "CHECKR", "CLEAR",
-                                    "CLOSE", "COLON", "COMMIT", "COMP", "DATE", "DEALLOC", "DEFINE", "DELETE", "DIV",
-                                    "DO", "DOU", "DOW", "DSPLY", "DUMP", "ELSE", "END", "ENDCS", "ENDDO", "ENDFOR",
-                                    "ENDIF", "ENDMON", "ENDSL", "ENDSR", "EVAL", "EVALR", "EXCEPT", "EXFMT", "EXSR",
-                                    "EXTRCT", "FEOD", "FOR", "FORCE", "GOTO", "IF", "IN", "ITER", "KFLD", "KLIST", "LEAVE",
-                                    "LEAVESR", "LITEXPR", "LOOKUP", "MHHZO", "MHLZO", "MLHZO", "MLLZO", "MONITOR", "MOVE",
-                                    "MOVEA", "MOVEL", "MULT", "MVR", "NEXT", "NONE", "NOT", "OCCUR", "OPEN", "ORGE",
-                                    "ORGT", "ORLE", "ORLT", "OTHER", "OUT", "PARM", "PLIST", "POST", "READ", "READC",
-                                    "READE", "READP", "READPE", "REALLOC", "REL", "RESET", "RETURN", "ROLBK", "SCAN",
-                                    "SELECT", "SEMI", "SETGT", "SETLL", "SETOFF", "SETON", "SHTDN", "SORTA", "SPACE",
-                                    "SQRT", "SUB", "SUBDUR", "SUBST", "TAG", "TEST", "TESTB", "TESTN", "TESTZ", "TIME",
-                                    "UNIEXP", "UNIOP", "UNLOCK", "UPDATE", "WHEN", "WRITE", "XFOOT", "XLATE", "Z-ADD", "Z-SUB"}
 
-        max = keyWords.Length
-        min = 0
-        mid = max >> 1
+        Dim ishere As String
 
-        While True
-            ' check symbol
-            If keyWords(mid) = kw Then
-                Return True
-            End If
+        ' find the symbol in the list
+        ishere = (From nt In struckeyWords
+                  Where nt = kw).FirstOrDefault()
 
-            ' set New range
-            If String.Compare(keyWords(mid), kw) < 0 Then
-                min = mid
-            Else
-                max = mid
-            End If
-
-            ' compute next symbol
-            diff = (max - min)
-            mid = diff >> 1
-            mid += min
-
-            ' exit symbol Not found
-            If diff = 0 Then
-                Return False
-            End If
-        End While
-
-        Return False
+        Return (ishere Is Nothing) = False
     End Function
 
     ' //////////////////////////////////////////////////////////////////////////////////
@@ -656,29 +370,9 @@ Public Class SyntaxFacts
                 kind = TokenKind.TK_AND
             Case "OR"
                 kind = TokenKind.TK_OR
-            Case "LR"
-                kind = TokenKind.TK_INLR
-            Case "L0"
-                kind = TokenKind.TK_INDON
-            Case "L1"
-                kind = TokenKind.TK_INL1
-            Case "L2"
-                kind = TokenKind.TK_INL2
-            Case "L3"
-                kind = TokenKind.TK_INL3
-            Case "L4"
-                kind = TokenKind.TK_INL4
-            Case "L5"
-                kind = TokenKind.TK_INL5
-            Case "L6"
-                kind = TokenKind.TK_INL6
-            Case "L7"
-                kind = TokenKind.TK_INL7
-            Case "L8"
-                kind = TokenKind.TK_INL8
-            Case "L9"
-                kind = TokenKind.TK_INL9
-            Case "SR"
+            Case "SR",
+                 "  ",
+                 ""
                 kind = TokenKind.TK_SPACE
             Case Else
                 kind = TokenKind.TK_BADTOKEN
@@ -720,8 +414,22 @@ Public Class SyntaxFacts
         Select Case symbol.symbol
             Case "ADD"
                 kind = TokenKind.TK_ADD
-            Case "AND"
+            Case "AND",
+                 "ANDLE",
+                 "ANDLT",
+                 "ANDGE",
+                 "ANDGT",
+                 "ANDEQ",
+                 "ANDNE"
                 kind = TokenKind.TK_AND
+            Case "OR",
+                 "ORLE",
+                 "ORLT",
+                 "ORGE",
+                 "ORGT",
+                 "OREQ",
+                 "ORNE"
+                kind = TokenKind.TK_OR
             Case "DIV"
                 kind = TokenKind.TK_DIV
             Case "IF"
@@ -748,10 +456,13 @@ Public Class SyntaxFacts
                 kind = TokenKind.TK_NOT
             Case "MULT"
                 kind = TokenKind.TK_MULT
-            Case "OR"
-                kind = TokenKind.TK_OR
             Case "SUB"
                 kind = TokenKind.TK_SUB
+            Case "CIN",
+                 "COUT",
+                 "DSPLY",
+                 "SUBST"
+                kind = TokenKind.TK_IDENTIFIER
             Case Else
                 If Char.IsDigit(symbol.symbol(0)) = True Then
                     kind = TokenKind.TK_BADTOKEN
@@ -780,354 +491,167 @@ Public Class SyntaxFacts
 
         ' assign indicator
         Select Case sym
-            Case "  "
+            Case "  ",
+                     ""
                 kind = TokenKind.TK_SPACE
-            Case "01"
-                kind = TokenKind.TK_IN01
-            Case "02"
-                kind = TokenKind.TK_IN02
-            Case "03"
-                kind = TokenKind.TK_IN03
-            Case "04"
-                kind = TokenKind.TK_IN04
-            Case "05"
-                kind = TokenKind.TK_IN05
-            Case "06"
-                kind = TokenKind.TK_IN06
-            Case "07"
-                kind = TokenKind.TK_IN07
-            Case "08"
-                kind = TokenKind.TK_IN08
-            Case "09"
-                kind = TokenKind.TK_IN09
-            Case "10"
-                kind = TokenKind.TK_IN10
-            Case "11"
-                kind = TokenKind.TK_IN11
-            Case "12"
-                kind = TokenKind.TK_IN12
-            Case "13"
-                kind = TokenKind.TK_IN13
-            Case "14"
-                kind = TokenKind.TK_IN14
-            Case "15"
-                kind = TokenKind.TK_IN15
-            Case "16"
-                kind = TokenKind.TK_IN16
-            Case "17"
-                kind = TokenKind.TK_IN17
-            Case "18"
-                kind = TokenKind.TK_IN18
-            Case "19"
-                kind = TokenKind.TK_IN19
-            Case "20"
-                kind = TokenKind.TK_IN20
-
-            Case "21"
-                kind = TokenKind.TK_IN21
-            Case "22"
-                kind = TokenKind.TK_IN22
-            Case "23"
-                kind = TokenKind.TK_IN23
-            Case "24"
-                kind = TokenKind.TK_IN24
-            Case "25"
-                kind = TokenKind.TK_IN25
-            Case "26"
-                kind = TokenKind.TK_IN26
-            Case "27"
-                kind = TokenKind.TK_IN27
-            Case "28"
-                kind = TokenKind.TK_IN28
-            Case "29"
-                kind = TokenKind.TK_IN29
-            Case "30"
-                kind = TokenKind.TK_IN30
-
-            Case "31"
-                kind = TokenKind.TK_IN31
-            Case "32"
-                kind = TokenKind.TK_IN32
-            Case "33"
-                kind = TokenKind.TK_IN33
-            Case "34"
-                kind = TokenKind.TK_IN34
-            Case "35"
-                kind = TokenKind.TK_IN35
-            Case "36"
-                kind = TokenKind.TK_IN36
-            Case "37"
-                kind = TokenKind.TK_IN37
-            Case "38"
-                kind = TokenKind.TK_IN38
-            Case "39"
-                kind = TokenKind.TK_IN39
-            Case "40"
-                kind = TokenKind.TK_IN40
-
-            Case "41"
-                kind = TokenKind.TK_IN41
-            Case "42"
-                kind = TokenKind.TK_IN42
-            Case "43"
-                kind = TokenKind.TK_IN43
-            Case "44"
-                kind = TokenKind.TK_IN44
-            Case "45"
-                kind = TokenKind.TK_IN45
-            Case "46"
-                kind = TokenKind.TK_IN46
-            Case "47"
-                kind = TokenKind.TK_IN47
-            Case "48"
-                kind = TokenKind.TK_IN48
-            Case "49"
-                kind = TokenKind.TK_IN49
-            Case "50"
-                kind = TokenKind.TK_IN50
-
-            Case "51"
-                kind = TokenKind.TK_IN51
-            Case "52"
-                kind = TokenKind.TK_IN52
-            Case "53"
-                kind = TokenKind.TK_IN53
-            Case "54"
-                kind = TokenKind.TK_IN54
-            Case "55"
-                kind = TokenKind.TK_IN55
-            Case "56"
-                kind = TokenKind.TK_IN56
-            Case "57"
-                kind = TokenKind.TK_IN57
-            Case "58"
-                kind = TokenKind.TK_IN58
-            Case "59"
-                kind = TokenKind.TK_IN59
-            Case "60"
-                kind = TokenKind.TK_IN60
-
-            Case "61"
-                kind = TokenKind.TK_IN61
-            Case "62"
-                kind = TokenKind.TK_IN62
-            Case "63"
-                kind = TokenKind.TK_IN63
-            Case "64"
-                kind = TokenKind.TK_IN64
-            Case "65"
-                kind = TokenKind.TK_IN65
-            Case "66"
-                kind = TokenKind.TK_IN66
-            Case "67"
-                kind = TokenKind.TK_IN67
-            Case "68"
-                kind = TokenKind.TK_IN68
-            Case "69"
-                kind = TokenKind.TK_IN69
-            Case "70"
-                kind = TokenKind.TK_IN70
-
-            Case "71"
-                kind = TokenKind.TK_IN71
-            Case "72"
-                kind = TokenKind.TK_IN72
-            Case "73"
-                kind = TokenKind.TK_IN73
-            Case "74"
-                kind = TokenKind.TK_IN74
-            Case "75"
-                kind = TokenKind.TK_IN75
-            Case "76"
-                kind = TokenKind.TK_IN76
-            Case "77"
-                kind = TokenKind.TK_IN77
-            Case "78"
-                kind = TokenKind.TK_IN78
-            Case "79"
-                kind = TokenKind.TK_IN79
-            Case "80"
-                kind = TokenKind.TK_IN80
-
-            Case "81"
-                kind = TokenKind.TK_IN81
-            Case "82"
-                kind = TokenKind.TK_IN82
-            Case "83"
-                kind = TokenKind.TK_IN83
-            Case "84"
-                kind = TokenKind.TK_IN84
-            Case "85"
-                kind = TokenKind.TK_IN85
-            Case "86"
-                kind = TokenKind.TK_IN86
-            Case "87"
-                kind = TokenKind.TK_IN87
-            Case "88"
-                kind = TokenKind.TK_IN88
-            Case "89"
-                kind = TokenKind.TK_IN89
-            Case "90"
-                kind = TokenKind.TK_IN90
-
-
-            Case "91"
-                kind = TokenKind.TK_IN91
-            Case "92"
-                kind = TokenKind.TK_IN92
-            Case "93"
-                kind = TokenKind.TK_IN93
-            Case "94"
-                kind = TokenKind.TK_IN94
-            Case "95"
-                kind = TokenKind.TK_IN95
-            Case "96"
-                kind = TokenKind.TK_IN96
-            Case "97"
-                kind = TokenKind.TK_IN97
-            Case "98"
-                kind = TokenKind.TK_IN98
-            Case "99"
-                kind = TokenKind.TK_IN99
-            Case "LR"
-                kind = TokenKind.TK_INLR
-
-            Case "H1"
-                kind = TokenKind.TK_INH1
-            Case "H2"
-                kind = TokenKind.TK_INH2
-            Case "H3"
-                kind = TokenKind.TK_INH3
-            Case "H4"
-                kind = TokenKind.TK_INH4
-            Case "H5"
-                kind = TokenKind.TK_INH5
-            Case "H6"
-                kind = TokenKind.TK_INH6
-            Case "H7"
-                kind = TokenKind.TK_INH7
-            Case "H8"
-                kind = TokenKind.TK_INH8
-            Case "H9"
-                kind = TokenKind.TK_INH9
-            Case "KA"
-                kind = TokenKind.TK_INKA
-
-            Case "KB"
-                kind = TokenKind.TK_INKB
-
-            Case "KC"
-                kind = TokenKind.TK_INKC
-
-            Case "KD"
-                kind = TokenKind.TK_INKD
-
-            Case "KE"
-                kind = TokenKind.TK_INKE
-
-            Case "KF"
-                kind = TokenKind.TK_INKF
-
-            Case "KG"
-                kind = TokenKind.TK_INKG
-
-            Case "KH"
-                kind = TokenKind.TK_INKH
-
-            Case "KI"
-                kind = TokenKind.TK_INKI
-
-            Case "KJ"
-                kind = TokenKind.TK_INKJ
-
-            Case "KK"
-                kind = TokenKind.TK_INKK
-
-            Case "KL"
-                kind = TokenKind.TK_INKL
-
-            Case "KM"
-                kind = TokenKind.TK_INKM
-
-            Case "KN"
-                kind = TokenKind.TK_INKN
-
-            Case "KO"
-                kind = TokenKind.TK_INKO
-
-            Case "KP"
-                kind = TokenKind.TK_INKP
-
-            Case "KQ"
-                kind = TokenKind.TK_INKQ
-
-            Case "KR"
-                kind = TokenKind.TK_INKR
-
-            Case "KS"
-                kind = TokenKind.TK_INKS
-
-            Case "KT"
-                kind = TokenKind.TK_INKT
-
-            Case "KU"
-                kind = TokenKind.TK_INKU
-
-            Case "KV"
-                kind = TokenKind.TK_INKV
-
-            Case "KW"
-                kind = TokenKind.TK_INKW
-
-            Case "KX"
-                kind = TokenKind.TK_INKX
-
-            Case "1"
-                kind = TokenKind.TK_INL1
-            Case "L2"
-                kind = TokenKind.TK_INL2
-            Case "L3"
-                kind = TokenKind.TK_INL3
-            Case "L4"
-                kind = TokenKind.TK_INL4
-            Case "L5"
-                kind = TokenKind.TK_INL5
-            Case "L6"
-                kind = TokenKind.TK_INL6
-            Case "L7"
-                kind = TokenKind.TK_INL7
-            Case "L8"
-                kind = TokenKind.TK_INL8
-            Case "L9"
-                kind = TokenKind.TK_INL9
-            Case "M1"
-                kind = TokenKind.TK_INM1
-            Case "M2"
-                kind = TokenKind.TK_INM2
-            Case "M3"
-                kind = TokenKind.TK_INM3
-            Case "M4"
-                kind = TokenKind.TK_INM4
-            Case "M5"
-                kind = TokenKind.TK_INM5
-            Case "M6"
-                kind = TokenKind.TK_INM6
-            Case "M7"
-                kind = TokenKind.TK_INM7
-            Case "M8"
-                kind = TokenKind.TK_INM8
-            Case "M9"
-                kind = TokenKind.TK_INM9
-            Case "MR"
-                kind = TokenKind.TK_INMR
-            Case "OA"
-                kind = TokenKind.TK_INOA
-            Case "OG"
-                kind = TokenKind.TK_INOG
-            Case "OV"
-                kind = TokenKind.TK_INOV
-            Case "RT"
-                kind = TokenKind.TK_INRT
+            Case "01",
+                     "02",
+                     "03",
+                     "04",
+                     "05",
+                     "06",
+                     "07",
+                     "08",
+                     "09",
+                     "10",
+                     "11",
+                     "12",
+                     "13",
+                     "14",
+                     "15",
+                     "16",
+                     "17",
+                     "18",
+                     "19",
+                     "20",
+                     "21",
+                     "22",
+                     "23",
+                     "24",
+                     "25",
+                     "26",
+                     "27",
+                     "28",
+                     "29",
+                     "30",
+                     "31",
+                     "32",
+                     "33",
+                     "34",
+                     "35",
+                     "36",
+                     "37",
+                     "38",
+                     "39",
+                     "40",
+                     "41",
+                     "42",
+                     "43",
+                     "44",
+                     "45",
+                     "46",
+                     "47",
+                     "48",
+                     "49",
+                     "50",
+                     "51",
+                     "52",
+                     "53",
+                     "54",
+                     "55",
+                     "56",
+                     "57",
+                     "58",
+                     "59",
+                     "60",
+                     "61",
+                     "62",
+                     "63",
+                     "64",
+                     "65",
+                     "66",
+                     "67",
+                     "68",
+                     "69",
+                     "70",
+                     "71",
+                     "72",
+                     "73",
+                     "74",
+                     "75",
+                     "76",
+                     "77",
+                     "78",
+                     "79",
+                     "80",
+                     "81",
+                     "82",
+                     "83",
+                     "84",
+                     "85",
+                     "86",
+                     "87",
+                     "88",
+                     "89",
+                     "90",
+                     "91",
+                     "92",
+                     "93",
+                     "94",
+                     "95",
+                     "96",
+                     "97",
+                     "98",
+                     "99",
+                     "LR",
+                     "H1",
+                     "H2",
+                     "H3",
+                     "H4",
+                     "H5",
+                     "H6",
+                     "H7",
+                     "H8",
+                     "H9",
+                     "KA",
+                     "KB",
+                     "KC",
+                     "KD",
+                     "KE",
+                     "KF",
+                     "KG",
+                     "KH",
+                     "KI",
+                     "KJ",
+                     "KK",
+                     "KL",
+                     "KM",
+                     "KN",
+                     "KO",
+                     "KP",
+                     "KQ",
+                     "KR",
+                     "KS",
+                     "KT",
+                     "KU",
+                     "KV",
+                     "KW",
+                     "KX",
+                     "L0",
+                     "L1",
+                     "L2",
+                     "L3",
+                     "L4",
+                     "L5",
+                     "L6",
+                     "L7",
+                     "L8",
+                     "L9",
+                     "M1",
+                     "M2",
+                     "M3",
+                     "M4",
+                     "M5",
+                     "M6",
+                     "M7",
+                     "M8",
+                     "M9",
+                     "MR",
+                     "OA",
+                     "OG",
+                     "OV",
+                     "RT"
+                kind = TokenKind.TK_IDENTIFIER
             Case Else
                 kind = TokenKind.TK_BADTOKEN
         End Select
@@ -1143,5 +667,135 @@ Public Class SyntaxFacts
         End Select
 
         Return Nothing
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////
+    Public Shared Function getRPGType(vtype As String) As TokenKind
+
+        Select Case (vtype.ToUpper())
+            Case "I"
+                Return TokenKind.TK_INTEGER
+            Case "F"
+                Return TokenKind.TK_FLOAT
+            Case "P"
+                Return TokenKind.TK_PACKED
+            Case "S"
+                Return TokenKind.TK_ZONED
+            Case "N"
+                Return TokenKind.TK_INDICATOR
+            Case "D"
+                Return TokenKind.TK_DATE
+            Case "T"
+                Return TokenKind.TK_TIME
+            Case "Z"
+                Return TokenKind.TK_TIMESTAMP
+            Case "A", " "
+                Return TokenKind.TK_STRING
+            Case Else
+                Return TokenKind.TK_BADTOKEN
+        End Select
+    End Function
+
+
+    ' //////////////////////////////////////////////////////////////////////////////////
+    Public Shared Function getRPGTypeFree(vtype As String) As TokenKind
+
+        Select Case vtype.ToUpper()
+            Case "INT"
+                Return TokenKind.TK_INTEGER
+            Case "FLOAT"
+                Return TokenKind.TK_FLOAT
+            Case "PACKED"
+                Return TokenKind.TK_PACKED
+            Case "ZONED"
+                Return TokenKind.TK_ZONED
+            Case "IND"
+                Return TokenKind.TK_INDICATOR
+            Case "DATE"
+                Return TokenKind.TK_DATE
+            Case "TIME"
+                Return TokenKind.TK_TIME
+            Case "TIMESTAMP"
+                Return TokenKind.TK_TIMESTAMP
+            Case "CHAR", "VARCHAR"
+                Return TokenKind.TK_STRING
+            Case Else
+                Return TokenKind.TK_BADTOKEN
+        End Select
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////
+    Public Shared Function doColectAnotherCard(symbol As String) As Boolean
+        Select Case (symbol)
+                "ANDEQ",
+                "ANDNE",
+                "ANDLT",
+                "ANDGT",
+                "ANDGE",
+                "ANDLE",
+                "OREQ" ,
+                "ORNE" ,
+                "ORLT" ,
+                "ORGT" ,
+                "ORGE" ,
+                "ORLE" ,
+                "IFEQ" ,
+                "IFNE" ,
+                "IFLT" ,
+                "IFGT" ,
+                "IFGE" ,
+                "IFLE" ,
+                "DOWEQ",
+                "DOWNE",
+                "DOWLT",
+                "DOWGT",
+                "DOWGE",
+                "DOWLE",
+                "DOUEQ",
+                "DOUNE",
+                "DOULT",
+                "DOUGT",
+                "DOUGE",
+                "DOULE"
+                Return True
+            Case Else
+                Return False
+        End Select
+    End Function
+
+
+    ' //////////////////////////////////////////////////////////////////////////////////
+    Public Shared Function getindicatorOperation(Hi As String, Lo As String, Eq As String) As TokenKind
+        Dim cmp As String = ""
+
+        Hi = Hi.Trim()
+        Lo = Lo.Trim()
+        Eq = Eq.Trim()
+
+        cmp += IIf(String.IsNullOrEmpty(Hi), "1", "0")
+        cmp += IIf(String.IsNullOrEmpty(Lo), "1", "0")
+        cmp += IIf(String.IsNullOrEmpty(Eq), "1", "0")
+
+        Select Case cmp
+            Case "001"
+                Return TokenKind.TK_EQ
+            Case "010"
+                Return TokenKind.TK_LT
+            Case "011"
+                Return TokenKind.TK_LE
+            Case "100"
+                Return TokenKind.TK_GT
+            Case "101"
+                Return TokenKind.TK_GE
+            Case "110"
+                Return TokenKind.TK_NE
+            Case Else
+                Return TokenKind.TK_BADTOKEN
+        End Select
+    End Function
+
+    ' //////////////////////////////////////////////////////////////////////////////////
+    Public Shared Function getAllIndicators() As String()
+        Return BIIndicators
     End Function
 End Class

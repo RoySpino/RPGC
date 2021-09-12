@@ -1,27 +1,27 @@
 ﻿Public Class BoundBinOperator
     Public SyntaxKind As TokenKind
     Public tok As BoundBinOpToken
-    Public RightType As Type
-    Public LeftType As Type
-    Public ResultType As Type
+    Public RightType As TypeSymbol
+    Public LeftType As TypeSymbol
+    Public ResultType As TypeSymbol
 
     Public Shared OPERATORS() As BoundBinOperator = {
-            New BoundBinOperator(TokenKind.TK_ADD, BoundBinOpToken.BBO_ADD, GetType(Int32)),
-            New BoundBinOperator(TokenKind.TK_SUB, BoundBinOpToken.BBO_SUB, GetType(Int32)),
-            New BoundBinOperator(TokenKind.TK_MULT, BoundBinOpToken.BBO_MULT, GetType(Int32)),
-            New BoundBinOperator(TokenKind.TK_DIV, BoundBinOpToken.BBO_DIV, GetType(Int32)),
-            New BoundBinOperator(TokenKind.TK_AND, BoundBinOpToken.BBO_AND, GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_OR, BoundBinOpToken.BBO_OR, GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_EQ, BoundBinOpToken.BBO_EQ, GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_NE, BoundBinOpToken.BBO_NE, GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_GE, BoundBinOpToken.BBO_GE, GetType(Int32), GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_GT, BoundBinOpToken.BBO_GT, GetType(Int32), GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_LE, BoundBinOpToken.BBO_LE, GetType(Int32), GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_LT, BoundBinOpToken.BBO_LT, GetType(Int32), GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_EQ, BoundBinOpToken.BBO_EQ, GetType(Int32), GetType(Boolean)),
-            New BoundBinOperator(TokenKind.TK_NE, BoundBinOpToken.BBO_NE, GetType(Int32), GetType(Boolean))}
+            New BoundBinOperator(TokenKind.TK_ADD, BoundBinOpToken.BBO_ADD, TypeSymbol.Integer_),
+            New BoundBinOperator(TokenKind.TK_SUB, BoundBinOpToken.BBO_SUB, TypeSymbol.Integer_),
+            New BoundBinOperator(TokenKind.TK_MULT, BoundBinOpToken.BBO_MULT, TypeSymbol.Integer_),
+            New BoundBinOperator(TokenKind.TK_DIV, BoundBinOpToken.BBO_DIV, TypeSymbol.Integer_),
+            New BoundBinOperator(TokenKind.TK_AND, BoundBinOpToken.BBO_AND, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_OR, BoundBinOpToken.BBO_OR, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_EQ, BoundBinOpToken.BBO_EQ, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_NE, BoundBinOpToken.BBO_NE, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_GE, BoundBinOpToken.BBO_GE, TypeSymbol.Integer_, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_GT, BoundBinOpToken.BBO_GT, TypeSymbol.Integer_, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_LE, BoundBinOpToken.BBO_LE, TypeSymbol.Integer_, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_LT, BoundBinOpToken.BBO_LT, TypeSymbol.Integer_, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_EQ, BoundBinOpToken.BBO_EQ, TypeSymbol.Integer_, TypeSymbol.Indicator),
+            New BoundBinOperator(TokenKind.TK_NE, BoundBinOpToken.BBO_NE, TypeSymbol.Integer_, TypeSymbol.Indicator)}
 
-    Public Sub New(synKind As TokenKind, kind As BoundBinOpToken, typ As Type)
+    Public Sub New(synKind As TokenKind, kind As BoundBinOpToken, typ As TypeSymbol)
         SyntaxKind = synKind
         tok = kind
         LeftType = typ
@@ -30,7 +30,7 @@
     End Sub
 
     ' ///////////////////////////////////////////////////////////////////////////////
-    Public Sub New(synKind As TokenKind, kind As BoundBinOpToken, typ As Type, resType As Type)
+    Public Sub New(synKind As TokenKind, kind As BoundBinOpToken, typ As TypeSymbol, resType As TypeSymbol)
         SyntaxKind = synKind
         tok = kind
         LeftType = typ
@@ -39,7 +39,7 @@
     End Sub
 
     ' ///////////////////////////////////////////////////////////////////////////////
-    Public Sub New(synKind As TokenKind, kind As BoundBinOpToken, Ltyp As Type, Rtyp As Type, resType As Type)
+    Public Sub New(synKind As TokenKind, kind As BoundBinOpToken, Ltyp As TypeSymbol, Rtyp As TypeSymbol, resType As TypeSymbol)
         SyntaxKind = synKind
         tok = kind
         LeftType = Ltyp
@@ -48,9 +48,9 @@
     End Sub
 
     ' ///////////////////////////////////////////////////////////////////////////////
-    Public Shared Function bind(kind As TokenKind, Ltype As Type, Rtype As Type)
+    Public Shared Function bind(kind As TokenKind, Ltype As TypeSymbol, Rtype As TypeSymbol)
         For Each op As BoundBinOperator In OPERATORS
-            If (op.SyntaxKind = kind And op.LeftType = Ltype And op.RightType = Rtype) Then
+            If op.SyntaxKind = kind And op.LeftType.Equals(Ltype) = True And op.RightType.Equals(Rtype) = True Then
                 Return op
             End If
         Next

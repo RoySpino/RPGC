@@ -9,6 +9,98 @@ Public Class Binder
     End Sub
 
     ' ///////////////////////////////////////////////////////////////////////////////
+    Public Shared Function BindGlobalScope(prev As BoundGlobalScope, syntax As CompilationUnit) As BoundGlobalScope
+        Dim parantScop As BoundScope
+        Dim bind As Binder
+        Dim stmt As BoundStatement
+        Dim vars As ImmutableArray(Of VariableSymbol)
+        Dim diag As ImmutableArray(Of Diagnostics)
+
+        parantScop = createParantScope(prev)
+        bind = New Binder(parantScop)
+        stmt = bind.BindStatements(syntax.Statement)
+        vars = bind.scope.getDeclaredVariables()
+        diag = bind.diagnostics.ToImmutableArray()
+
+        If (prev Is Nothing) = False Then
+            diag = diag.InsertRange(0, prev.Diagnostic)
+        End If
+
+        Return New BoundGlobalScope(prev, diag, vars, stmt)
+    End Function
+
+
+    ' ///////////////////////////////////////////////////////////////////////////////
+    Private Shared Function createParantScope(prev As BoundGlobalScope) As BoundScope
+        Dim stk As Stack(Of BoundGlobalScope) = New Stack(Of BoundGlobalScope)()
+        Dim parant As BoundScope = Nothing
+        Dim _scope As BoundScope
+
+        While prev Is Nothing = False
+            stk.Push(prev)
+            prev = prev.Preveous
+        End While
+
+        While stk.Count > 0
+            prev = stk.Pop()
+            _scope = New BoundScope(parant)
+
+            For Each v As VariableSymbol In prev.Variables
+                _scope.declareVar(v)
+            Next
+
+            parant = _scope
+        End While
+
+        Return parant
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////////
+    Private Shared Function createRootScope() As BoundScope
+        Dim Res As BoundScope
+
+        Res = New BoundScope(Nothing)
+
+        ' declare built in functions
+        For Each fnc As FunctionSymbol In BuiltinFunctions.getAll()
+            Res.declareFunciton(fnc)
+        Next
+
+        ' declare builtin variables
+        For Each v As String In SyntaxFacts.getAllIndicators()
+            Res.declareVar(New VariableSymbol($"*IN{v}", False, TypeSymbol.Indicator))
+        Next
+
+        Return Res
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////////
+    Private Function BindStatements(syntax As StatementSyntax) As BoundStatement
+        Select Case syntax.kind
+            Case TokenKind.TK_BLOCKSYNTX
+                Return BindBlockStatement(syntax)
+            Case TokenKind.TK_EXPRNSTMNT
+                Return BindExpressionStatement(syntax)
+            Case TokenKind.TK_VARDECLR
+                Return BindVariableDeclaration(syntax)
+            Case TokenKind.TK_IF
+                Return BindIfStatement(syntax)
+            Case TokenKind.TK_DOW
+                Return BindWhileStatement(syntax)
+            Case TokenKind.TK_DOU
+                Return BindUntilStatement(syntax)
+            Case TokenKind.TK_FOR
+                Return BindForStatement(syntax)
+            Case TokenKind.TK_GOTO
+                Return BindGoToStatement(syntax)
+            Case TokenKind.TK_TAG
+                Return BindTagStatement(syntax)
+            Case Else
+                Throw New Exception(String.Format("Unexpected Syntax {0}", syntax.kind))
+        End Select
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////
     Public Function BindExpression(syntax As ExpresionSyntax) As BoundExpression
         Select Case syntax.kind
             Case TokenKind.TK_PARENEXP
@@ -23,37 +115,31 @@ Public Class Binder
                 Return BindNamedExpression(syntax)
             Case TokenKind.TK_ASSIGN
                 Return BindAssignmentExpression(syntax)
+            Case TokenKind.TK_CALL,
+                 TokenKind.TK_CALLP,
+                 TokenKind.TK_CALLB
+                Return BindCallExpression(syntax)
             Case Else
                 Throw New Exception(String.Format("Unexpected Syntax {0}", syntax.kind))
         End Select
     End Function
+
     ' ///////////////////////////////////////////////////////////////////////////////
-    Public Function BindExpression(syntax As ExpresionSyntax, expectedResult As Type) As BoundExpression
+    Private Function BindCallExpression(syntax As CallExpressionSyntax) As BoundExpression
+        Throw New NotImplementedException()
+    End Function
+
+    ' ///////////////////////////////////////////////////////////////////////////////
+    Public Function BindExpression(syntax As ExpresionSyntax, expectedResult As TypeSymbol) As BoundExpression
         Dim result As BoundExpression
 
         result = BindExpression(syntax)
 
-        If result.typ <> expectedResult Then
+        If result.typ.Equals(expectedResult) = False Then
             diagnostics.reportCannotConvert(syntax.Span, result.typ, expectedResult)
         End If
 
         Return result
-    End Function
-
-    ' ///////////////////////////////////////////////////////////////////////////////
-    Private Function BindStatements(syntax As StatementSyntax) As BoundStatement
-        Select Case syntax.kind
-            Case TokenKind.TK_BLOCKSYNTX
-                Return BindBlockStatement(syntax)
-            Case TokenKind.TK_EXPRNSTMNT
-                Return BindExpressionStatement(syntax)
-            Case TokenKind.TK_VARDECLR
-                Return BindVariableDeclaration(syntax)
-            Case TokenKind.TK_IF
-                Return BindIfStatement(syntax)
-            Case Else
-                Throw New Exception(String.Format("Unexpected Syntax {0}", syntax.kind))
-        End Select
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////////////
@@ -63,7 +149,7 @@ Public Class Binder
         Dim elseStatement As BoundStatement
 
         ' set condition and then statments
-        condition = BindExpression(syntax.Condition, GetType(Boolean))
+        condition = BindExpression(syntax.Condition, TypeSymbol.Indicator)
         thenStatement = BindStatements(syntax.ThenStatement)
 
         ' set else statement
@@ -86,7 +172,7 @@ Public Class Binder
         name = syntax.Identifier.sym.ToString()
         isReadOnly = (syntax.kind = TokenKind.TK_VARDCONST)
         expression = BindExpression(syntax.Initilizer)
-        variable = New VariableSymbol(name, expression.typ, isReadOnly)
+        variable = New VariableSymbol(name, isReadOnly, expression.typ)
 
         If scope.declareVar(variable) = False Then
             diagnostics.reportVariableAlreadyDeclared(syntax.Span, name)
@@ -120,52 +206,6 @@ Public Class Binder
         expression = BindExpression(syntax.Expression)
 
         Return New BoundExpressionStatement(expression)
-    End Function
-
-    ' ///////////////////////////////////////////////////////////////////////////////
-    Public Shared Function bindGlobalScope(prev As BoundGlobalScope, syntax As CompilationUnit)
-        Dim parantScop As BoundScope
-        Dim bind As Binder
-        Dim stmt As BoundStatement
-        Dim vars As ImmutableArray(Of VariableSymbol)
-        Dim diag As ImmutableArray(Of Diagnostics)
-
-        parantScop = createParantScope(prev)
-        bind = New Binder(parantScop)
-        stmt = bind.BindStatements(syntax.Statement)
-        vars = bind.scope.getDeclaredVariables()
-        diag = bind.diagnostics.ToImmutableArray()
-
-        If prev Is Nothing = False Then
-            diag = diag.InsertRange(0, prev.Diagnostic)
-        End If
-
-        Return New BoundGlobalScope(prev, diag, vars, stmt)
-    End Function
-
-    ' ///////////////////////////////////////////////////////////////////////////////
-    Private Shared Function createParantScope(prev As BoundGlobalScope) As BoundScope
-        Dim stk As Stack(Of BoundGlobalScope) = New Stack(Of BoundGlobalScope)()
-        Dim parant as BoundScope = Nothing
-        Dim _scope As BoundScope
-
-        While prev Is Nothing = False
-            stk.Push(prev)
-            prev = prev.Preveous
-        End While
-
-        While stk.Count > 0
-            prev = stk.Pop()
-            _scope = New BoundScope(parant)
-
-            For Each v As VariableSymbol In prev.Variables
-                _scope.declareVar(v)
-            Next
-
-            parant = _scope
-        End While
-
-        Return parant
     End Function
 
     ' ///////////////////////////////////////////////////////////////////////////////
@@ -204,11 +244,11 @@ Public Class Binder
             Return boundExp
         End If
 
-        If _var.IsReadOnly = True Then
+        If _var.IsReadonly_ = True Then
             diagnostics.reportAssignmentOfConstantVar(syntax.IDENTIFIERTOKEN.Span, name)
         End If
 
-        If boundExp.typ <> _var._type Then
+        If boundExp.typ.Equals(_var.Type_) = False Then
             diagnostics.reportVariableAlreadyDeclared(syntax.IDENTIFIERTOKEN.Span, name)
             'diagnostics.reportCannotConvertType(syntax.EXPRESSION.Span, name, boundExp.typ, _var._type)
             Return boundExp
@@ -260,6 +300,87 @@ Public Class Binder
         Return New BoundBinExpression(Left, boundOperatorKind, Right)
     End Function
 
+    ' ////////////////////////////////////////////////////////////////////////////////////////
+    Private Function BindTagStatement(syntax As TagStatementSyntax) As BoundStatement
+        Dim lbl As LabelSymbol
+
+        lbl = New LabelSymbol(syntax.LableName)
+
+        Return New BoundLabelStatement(lbl)
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////
+    Private Function BindWhileStatement(syntax As WhileStatementSyntax) As BoundStatement
+        Dim condition As BoundExpression
+        Dim body As BoundStatement
+
+        condition = BindExpression(syntax.Condition, TypeSymbol.Indicator)
+        body = BindStatements(syntax.Body)
+
+        ' loop error no condition was given
+        If condition Is Nothing Or condition.typ.Equals(TypeSymbol.Error_) = True Then
+            diagnostics.reportLoopWithoutCondition(syntax.Span, syntax.Keyword.sym.ToString())
+            Return New BoundErrorStatement()
+        End If
+
+        Return New BoundWhileStatement(condition, body)
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////
+    Private Function BindGoToStatement(syntax As GoToStatementSyntax) As BoundStatement
+        Dim lbl As LabelSymbol
+
+        lbl = New LabelSymbol(syntax.LableName)
+
+        Return New BoundGoToStatement(lbl)
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////
+    Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
+        Dim name As String = syntax.Identifier.sym.ToString()
+        Dim LBound As BoundExpression
+        Dim UBound As BoundExpression
+        Dim countBy As BoundExpression
+        Dim body As BoundStatement
+        Dim variable As VariableSymbol = Nothing
+        Dim isCountUp As Boolean
+
+        LBound = BindExpression(syntax.LowerBound)
+        UBound = BindExpression(syntax.UpperBound)
+        countBy = BindExpression(syntax.Increment)
+
+        isCountUp = (syntax.Keyword_By.kind = TokenKind.TK_TO)
+
+        ' variable must be declared before the for loop Is used
+        If scope.checkLocalVariables(name) = False Then
+            diagnostics.reportVariableDoesNotExist(syntax.Identifier.Span, name)
+            Return New BoundErrorStatement()
+        Else
+            variable = scope.variables(name)
+        End If
+
+        body = BindStatements(syntax.Body)
+
+        Return New BoundForStatement(variable, LBound, UBound, body, isCountUp, countBy)
+    End Function
+
+    ' ////////////////////////////////////////////////////////////////////////////////////////
+    Private Function BindUntilStatement(syntax As UntilStatementSyntax) As BoundStatement
+        Dim condition As BoundExpression
+        Dim body As BoundStatement
+
+        condition = BindExpression(syntax.Condition, TypeSymbol.Indicator)
+        body = BindStatements(syntax.Body)
+
+        ' loop error no condition was given
+        If condition Is Nothing Or condition.typ.Equals(TypeSymbol.Error_) = True Then
+            diagnostics.reportLoopWithoutCondition(syntax.Span, syntax.Keyword.sym.ToString())
+            Return New BoundErrorStatement()
+        End If
+
+        Return New BoundUntilStatement(condition, body)
+    End Function
+
     ' ///////////////////////////////////////////////////////////////////////////////
     Public Function getDiagnostics() As DiagnosticBag
         Return diagnostics
@@ -283,6 +404,8 @@ Public Enum BoundNodeToken
     BNT_DOUNTIL
     BNT_LABEL
     BNT_GOTO
+    BNT_CALLEXP
+    BNT_ERROREXP
 End Enum
 Public Enum BoundUniOpToken
     BUO_IDENTITY

@@ -388,4 +388,7 @@ Public Enum TokenKind
     TK_VARDDATAS
     TK_VARDCONST
     TK_ENDPROC
+    TK_TO
+    TK_INDICATOR
+    TK_TIMESTAMP
 End Enum

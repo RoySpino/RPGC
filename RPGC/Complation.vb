@@ -69,9 +69,11 @@ Public Class Complation
 
     ' ////////////////////////////////////////////////////////////////////////////////////////////////////
     Private Function getStatement() As BoundBlockStatement
-        Dim stmnt As BoundStatement
+        Dim stmnt As BoundBlockStatement
 
-        stmnt = _globalScope.Statement
-        Return Lowerer.Lower(stmnt)
+        stmnt = Lowerer.Lower(_globalScope.Statement)
+        _globalScope.Statement = stmnt
+
+        Return stmnt
     End Function
 End Class
