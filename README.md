@@ -1,5 +1,7 @@
 # RPGC
-a version of my RPGLE compiler written in VB.
+you cant spell rampage without RPG
+
+a version of my Rampage compiler written in VB.
 
 (Visual BASIC was chosen because it is my favorite language and to spite the people who say that VB can’t be used for anything.)
 
