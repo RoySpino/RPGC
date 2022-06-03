@@ -1,4 +1,4 @@
-# RPGC
+# Rampage (rpgc)
 you cant spell rampage without RPG
 
 a version of my Rampage compiler written in VB.
